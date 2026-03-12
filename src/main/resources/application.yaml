@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: skills-api
+  jackson:
+    default-property-inclusion: non_null
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 15
+      timeout: 5s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+skills-api:
+  web:
+    trace-header-name: X-Trace-Id
+    wrap-success-response: true
+  idempotency:
+    enabled: true
+    header-name: X-Idempotency-Key
+    ttl: PT10M
+  rate-limit:
+    enabled: true
+    client-identifier-header: X-Forwarded-For
+    default-window: PT1M
+    default-permits: 60
