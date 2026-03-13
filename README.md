@@ -25,7 +25,7 @@
 
 ### 热搜数据采集
 
-- **多平台支持** — 百度、微博、抖音热搜数据定时采集
+- **多平台支持** — 百度、微博、抖音、今日头条热搜数据定时采集
 - **自动调度** — 基于 Cron 表达式的可配置定时任务，各平台独立调度互不影响
 - **微博免登录** — 自动生成访客 Cookie，无需手动配置登录凭证
 - **两级缓存** — Redis 缓存（2 小时 TTL）+ MySQL 持久化，优先读缓存
@@ -45,7 +45,7 @@ src/main/java/ai/skills/api
 │   └── web                         #   Web 层（链路追踪 Filter）
 ├── demo                            # 演示接口
 └── hotsearch                       # 热搜采集模块
-    ├── collector                   #   平台采集器（百度、微博、抖音）
+    ├── collector                   #   平台采集器（百度、微博、抖音、头条）
     │   └── model                   #     API 响应模型
     ├── config                      #   调度配置
     ├── controller                  #   查询接口
@@ -109,6 +109,9 @@ curl http://localhost:8080/api/v1/hot-search/weibo/latest
 
 # 获取抖音热搜
 curl http://localhost:8080/api/v1/hot-search/douyin/latest
+
+# 获取头条热榜
+curl http://localhost:8080/api/v1/hot-search/toutiao/latest
 ```
 
 ## API 接口
@@ -120,7 +123,7 @@ curl http://localhost:8080/api/v1/hot-search/douyin/latest
 | GET | `/api/v1/hot-search/{platform}/latest` | 获取指定平台最新热搜 |
 | GET | `/api/v1/hot-search/{platform}/history?limit=50&offset=0` | 分页查询历史记录 |
 
-`platform` 可选值：`baidu`、`weibo`、`douyin`
+`platform` 可选值：`baidu`、`weibo`、`douyin`、`toutiao`
 
 ### 演示接口
 
@@ -160,6 +163,9 @@ skills-api:
       douyin:
         enabled: true
         cron: "0 0/20 * * * ?"   # 每 20 分钟
+      toutiao:
+        enabled: true
+        cron: "0 0/30 * * * ?"   # 每 30 分钟
 ```
 
 ## 开源协议

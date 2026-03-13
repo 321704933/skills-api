@@ -52,7 +52,10 @@ skills-api:
         cron: "0 0/30 * * * ?"
       weibo:
         enabled: true
-        cron: "0 0/15 * * * ?"
+        cron: "0 0/30 * * * ?"
       douyin:
         enabled: true
-        cron: "0 0/20 * * * ?"
+        cron: "0 0/30 * * * ?"
+      toutiao:
+        enabled: true
+        cron: "0 0/30 * * * ?"
