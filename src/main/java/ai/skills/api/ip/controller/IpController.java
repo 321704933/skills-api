@@ -2,6 +2,8 @@ package ai.skills.api.ip.controller;
 
 import ai.skills.api.ip.model.IpQueryResult;
 import ai.skills.api.ip.service.IpService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 功能：IP 地理位置查询接口。
  * 作者：Devil
  */
+@Tag(name = "IP 查询")
 @RestController
 @RequestMapping("/api/v1/ip")
 public class IpController {
@@ -31,6 +34,7 @@ public class IpController {
      * @param request HTTP 请求（用于获取调用者 IP）
      * @return IP 地理位置查询结果
      */
+    @Operation(summary = "查询 IP 地理位置", description = "根据IP地址查询地理位置信息，不传IP则自动获取调用者IP")
     @GetMapping("/query")
     public IpQueryResult query(@RequestParam(required = false) String ip,
                                HttpServletRequest request) {

@@ -2,6 +2,8 @@ package ai.skills.api.fortune.controller;
 
 import ai.skills.api.fortune.model.AlmanacResult;
 import ai.skills.api.fortune.service.AlmanacService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 功能：今日黄历接口控制器
  * 作者：Devil
  */
+@Tag(name = "今日黄历")
 @RestController
 @RequestMapping("/api")
 public class AlmanacController {
@@ -26,6 +29,7 @@ public class AlmanacController {
      *
      * @return 黄历信息
      */
+    @Operation(summary = "获取今日黄历", description = "获取今日黄历信息，包含干支、生肖、宜忌、吉凶方位等")
     @GetMapping("/almanac")
     public AlmanacResult getAlmanac() {
         return almanacService.getAlmanac();
