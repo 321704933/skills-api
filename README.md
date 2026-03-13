@@ -51,6 +51,13 @@
 - **自动获取 IP** — 支持传入 IP 地址查询，也可不传参数自动获取调用者 IP
 - **完整信息** — 返回国家、省份、城市、运营商等地理位置信息
 
+### 每日运势
+
+- **万年历信息** — 公历日期、农历日期、干支纪年（年月日干支）
+- **生肖星座** — 根据日期自动计算生肖和星座
+- **今日宜忌** — 基于日期种子随机生成，同一天结果一致
+- **星座运势** — 综合运势、爱情运势、事业运势、财运指数及运势文案
+
 ## 项目结构
 
 ```
@@ -87,6 +94,10 @@ src/main/java/ai/skills/api
     ├── controller                  #   查询接口
     ├── model                       #   响应 Record
     └── service                     #   业务逻辑（ip2region 离线查询）
+└── fortune                         # 每日运势模块
+    ├── controller                  #   查询接口
+    ├── model                       #   响应 Record
+    └── service                     #   业务逻辑（农历/宜忌/星座运势）
 ```
 
 ## 快速开始
@@ -159,6 +170,12 @@ curl "http://localhost:8080/api/v1/ip/query?ip=113.92.157.29"
 
 # IP 地理位置查询（自动获取调用者 IP）
 curl "http://localhost:8080/api/v1/ip/query"
+
+# 每日运势（今日）
+curl "http://localhost:8080/api/v1/fortune/daily"
+
+# 每日运势（指定日期和星座）
+curl "http://localhost:8080/api/v1/fortune/daily?date=2026-03-13&constellation=白羊座"
 ```
 
 ## API 接口
@@ -219,6 +236,44 @@ curl "http://localhost:8080/api/v1/ip/query"
     "province": "广东省",
     "city": "深圳市",
     "isp": "电信"
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-13T10:00:00"
+}
+```
+
+### 每日运势
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/fortune/daily` | 获取今日运势 |
+| GET | `/api/v1/fortune/daily?date=2026-03-13` | 获取指定日期运势 |
+| GET | `/api/v1/fortune/daily?constellation=白羊座` | 获取指定星座运势 |
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "date": "2026-03-13",
+    "lunarDate": "2026年正月廿五",
+    "yearGanZhi": "丙午",
+    "monthGanZhi": "辛卯",
+    "dayGanZhi": "癸巳",
+    "zodiac": "马",
+    "constellation": "双鱼座",
+    "suitable": ["写代码", "重构", "摸鱼"],
+    "avoid": ["删库跑路", "随意上线"],
+    "horoscope": {
+      "constellation": "双鱼座",
+      "overallLuck": 85,
+      "loveLuck": 72,
+      "careerLuck": 88,
+      "wealthLuck": 65,
+      "summary": "今日适合专注核心任务，避免分心。代码如有神助，Bug 绕道而行。"
+    }
   },
   "traceId": "a1b2c3d4e5f6",
   "timestamp": "2026-03-13T10:00:00"
