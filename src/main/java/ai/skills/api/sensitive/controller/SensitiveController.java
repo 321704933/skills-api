@@ -1,12 +1,11 @@
 package ai.skills.api.sensitive.controller;
 
-import ai.skills.api.sensitive.model.SensitiveCheckRequest;
 import ai.skills.api.sensitive.model.SensitiveCheckResult;
 import ai.skills.api.sensitive.service.SensitiveWordService;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -27,11 +26,11 @@ public class SensitiveController {
     /**
      * 功能：检测文本中是否包含违禁词。
      *
-     * @param request 包含待检测文本的请求体
+     * @param text 待检测文本
      * @return 检测结果
      */
-    @PostMapping("/check")
-    public SensitiveCheckResult check(@Valid @RequestBody SensitiveCheckRequest request) {
-        return sensitiveWordService.check(request.text());
+    @GetMapping("/check")
+    public SensitiveCheckResult check(@RequestParam @NotBlank(message = "text 不能为空") String text) {
+        return sensitiveWordService.check(text);
     }
 }

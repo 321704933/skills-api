@@ -12,6 +12,7 @@
 | Redisson | 3.46.0 | Redis 客户端（分布式锁、限流、缓存） |
 | MySQL | 8.x | 关系型数据库 |
 | Hutool | 5.8.40 | 工具库 |
+| ip2region | 3.3.6 | 离线 IP 地理位置查询 |
 
 ## 核心功能
 
@@ -43,6 +44,13 @@
 - **分类管理** — 违禁词支持分类（广告、暴力、色情、诈骗、赌博等），通过 SQL 维护
 - **文本过滤** — 返回命中词列表及违禁词替换为 `*` 后的过滤文本
 
+### IP 地理位置查询
+
+- **离线数据库** — 基于 ip2region v3 离线 IP 数据库，纯内存查询，无需外部依赖
+- **全内存缓存** — 启动时将 xdb 文件加载到内存，查询性能极高且线程安全
+- **自动获取 IP** — 支持传入 IP 地址查询，也可不传参数自动获取调用者 IP
+- **完整信息** — 返回国家、省份、城市、运营商等地理位置信息
+
 ## 项目结构
 
 ```
@@ -69,12 +77,16 @@ src/main/java/ai/skills/api
 │   ├── entity                      #   数据库实体
 │   ├── mapper                      #   MyBatis-Plus Mapper
 │   └── service                     #   业务逻辑
-└── sensitive                       # 违禁词检测模块
-    ├── controller                  #   检测接口
-    ├── entity                      #   数据库实体
-    ├── mapper                      #   MyBatis-Plus Mapper
-    ├── model                       #   请求/响应 Record
-    └── service                     #   业务逻辑（DFA 词树 + 检测）
+├── sensitive                       # 违禁词检测模块
+│   ├── controller                  #   检测接口
+│   ├── entity                      #   数据库实体
+│   ├── mapper                      #   MyBatis-Plus Mapper
+│   ├── model                       #   请求/响应 Record
+│   └── service                     #   业务逻辑（DFA 词树 + 检测）
+└── ip                              # IP 地理位置查询模块
+    ├── controller                  #   查询接口
+    ├── model                       #   响应 Record
+    └── service                     #   业务逻辑（ip2region 离线查询）
 ```
 
 ## 快速开始
@@ -140,9 +152,13 @@ curl http://localhost:8080/api/v1/hot-search/toutiao/latest
 curl http://localhost:8080/api/v1/prose/random
 
 # 违禁词检测
-curl -X POST http://localhost:8080/api/v1/sensitive/check \
-  -H "Content-Type: application/json" \
-  -d '{"text":"免费领取大奖，加微信了解详情"}'
+curl "http://localhost:8080/api/v1/sensitive/check?text=免费领取大奖，加微信了解详情"
+
+# IP 地理位置查询（传入指定 IP）
+curl "http://localhost:8080/api/v1/ip/query?ip=113.92.157.29"
+
+# IP 地理位置查询（自动获取调用者 IP）
+curl "http://localhost:8080/api/v1/ip/query"
 ```
 
 ## API 接口
@@ -166,13 +182,7 @@ curl -X POST http://localhost:8080/api/v1/sensitive/check \
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/api/v1/sensitive/check` | 检测文本是否包含违禁词 |
-
-**请求体：**
-
-```json
-{ "text": "要检查的文本内容" }
-```
+| GET | `/api/v1/sensitive/check?text=要检查的文本内容` | 检测文本是否包含违禁词 |
 
 **响应示例：**
 
@@ -184,6 +194,31 @@ curl -X POST http://localhost:8080/api/v1/sensitive/check \
     "hasSensitive": true,
     "foundWords": ["免费领取", "加微信"],
     "filteredText": "****大奖，***了解详情"
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-13T10:00:00"
+}
+```
+
+### IP 地理位置查询
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/ip/query?ip=1.2.3.4` | 查询指定 IP 的地理位置 |
+| GET | `/api/v1/ip/query` | 自动获取调用者 IP 并查询 |
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "ip": "113.92.157.29",
+    "country": "中国",
+    "province": "广东省",
+    "city": "深圳市",
+    "isp": "电信"
   },
   "traceId": "a1b2c3d4e5f6",
   "timestamp": "2026-03-13T10:00:00"
