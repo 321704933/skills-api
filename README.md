@@ -36,6 +36,13 @@
 - **散文集** — 收录《我在人间凑数的日子》107 条经典句子
 - **随机返回** — 每次请求随机返回一条句子，适合用作每日一句、签名档等场景
 
+### 违禁词检测
+
+- **DFA 高效匹配** — 基于 Hutool `WordTree`（确定性有限自动机）实现多模式匹配，性能远优于逐词遍历
+- **启动预加载** — 应用启动时从数据库加载全部违禁词构建内存词树，检测请求无需查库
+- **分类管理** — 违禁词支持分类（广告、暴力、色情、诈骗、赌博等），通过 SQL 维护
+- **文本过滤** — 返回命中词列表及违禁词替换为 `*` 后的过滤文本
+
 ## 项目结构
 
 ```
@@ -57,11 +64,17 @@ src/main/java/ai/skills/api
 │   ├── entity                      #   数据库实体
 │   ├── mapper                      #   MyBatis-Plus Mapper
 │   └── service                     #   业务逻辑（持久化 + 缓存）
-└── prose                           # 散文随机句子模块
-    ├── controller                  #   查询接口
+├── prose                           # 散文随机句子模块
+│   ├── controller                  #   查询接口
+│   ├── entity                      #   数据库实体
+│   ├── mapper                      #   MyBatis-Plus Mapper
+│   └── service                     #   业务逻辑
+└── sensitive                       # 违禁词检测模块
+    ├── controller                  #   检测接口
     ├── entity                      #   数据库实体
     ├── mapper                      #   MyBatis-Plus Mapper
-    └── service                     #   业务逻辑
+    ├── model                       #   请求/响应 Record
+    └── service                     #   业务逻辑（DFA 词树 + 检测）
 ```
 
 ## 快速开始
@@ -78,7 +91,7 @@ src/main/java/ai/skills/api
 CREATE DATABASE skills_api DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-执行建表脚本：`src/main/resources/sql/hot_search_record.sql`、`src/main/resources/sql/prose_sentence.sql`
+执行建表脚本：`src/main/resources/sql/hot_search_record.sql`、`src/main/resources/sql/prose_sentence.sql`、`src/main/resources/sql/sensitive_word.sql`
 
 ### 2. 本地配置
 
@@ -125,6 +138,11 @@ curl http://localhost:8080/api/v1/hot-search/toutiao/latest
 
 # 随机散文句子
 curl http://localhost:8080/api/v1/prose/random
+
+# 违禁词检测
+curl -X POST http://localhost:8080/api/v1/sensitive/check \
+  -H "Content-Type: application/json" \
+  -d '{"text":"免费领取大奖，加微信了解详情"}'
 ```
 
 ## API 接口
@@ -143,6 +161,34 @@ curl http://localhost:8080/api/v1/prose/random
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/v1/prose/random` | 随机返回一条散文句子 |
+
+### 违禁词检测
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/v1/sensitive/check` | 检测文本是否包含违禁词 |
+
+**请求体：**
+
+```json
+{ "text": "要检查的文本内容" }
+```
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "hasSensitive": true,
+    "foundWords": ["免费领取", "加微信"],
+    "filteredText": "****大奖，***了解详情"
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-13T10:00:00"
+}
+```
 
 ### 演示接口
 
