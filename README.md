@@ -1,6 +1,6 @@
 # Skills API
 
-基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集能力。
+基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集与散文随机句子等趣味功能。
 
 ## 技术栈
 
@@ -31,6 +31,11 @@
 - **两级缓存** — Redis 缓存（2 小时 TTL）+ MySQL 持久化，优先读缓存
 - **每日去重** — 同平台每天仅保留最新一批数据，自动清理旧批次
 
+### 散文随机句子
+
+- **散文集** — 收录《我在人间凑数的日子》107 条经典句子
+- **随机返回** — 每次请求随机返回一条句子，适合用作每日一句、签名档等场景
+
 ## 项目结构
 
 ```
@@ -44,14 +49,19 @@ src/main/java/ai/skills/api
 │   ├── redis                       #   Redis 工具类（锁、缓存、发布订阅）
 │   └── web                         #   Web 层（链路追踪 Filter）
 ├── demo                            # 演示接口
-└── hotsearch                       # 热搜采集模块
-    ├── collector                   #   平台采集器（百度、微博、抖音、头条）
-    │   └── model                   #     API 响应模型
-    ├── config                      #   调度配置
+├── hotsearch                       # 热搜采集模块
+│   ├── collector                   #   平台采集器（百度、微博、抖音、头条）
+│   │   └── model                   #     API 响应模型
+│   ├── config                      #   调度配置
+│   ├── controller                  #   查询接口
+│   ├── entity                      #   数据库实体
+│   ├── mapper                      #   MyBatis-Plus Mapper
+│   └── service                     #   业务逻辑（持久化 + 缓存）
+└── prose                           # 散文随机句子模块
     ├── controller                  #   查询接口
     ├── entity                      #   数据库实体
     ├── mapper                      #   MyBatis-Plus Mapper
-    └── service                     #   业务逻辑（持久化 + 缓存）
+    └── service                     #   业务逻辑
 ```
 
 ## 快速开始
@@ -68,7 +78,7 @@ src/main/java/ai/skills/api
 CREATE DATABASE skills_api DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-执行建表脚本：`src/main/resources/sql/hot_search_record.sql`
+执行建表脚本：`src/main/resources/sql/hot_search_record.sql`、`src/main/resources/sql/prose_sentence.sql`
 
 ### 2. 本地配置
 
@@ -112,6 +122,9 @@ curl http://localhost:8080/api/v1/hot-search/douyin/latest
 
 # 获取头条热榜
 curl http://localhost:8080/api/v1/hot-search/toutiao/latest
+
+# 随机散文句子
+curl http://localhost:8080/api/v1/prose/random
 ```
 
 ## API 接口
@@ -124,6 +137,12 @@ curl http://localhost:8080/api/v1/hot-search/toutiao/latest
 | GET | `/api/v1/hot-search/{platform}/history?limit=50&offset=0` | 分页查询历史记录 |
 
 `platform` 可选值：`baidu`、`weibo`、`douyin`、`toutiao`
+
+### 散文句子
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/prose/random` | 随机返回一条散文句子 |
 
 ### 演示接口
 
