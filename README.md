@@ -4,16 +4,16 @@
 
 ## 技术栈
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| Java | 21 | LTS 版本 |
-| Spring Boot | 3.5.x | Web 框架 |
+| 组件 | 版本     | 说明 |
+|------|--------|------|
+| Java | 21     | LTS 版本 |
+| Spring Boot | 3.5.x  | Web 框架 |
 | MyBatis-Plus | 3.5.16 | ORM 持久层 |
 | Redisson | 3.46.0 | Redis 客户端（分布式锁、限流、缓存） |
-| MySQL | 8.x | 关系型数据库 |
+| MySQL | 8.x    | 关系型数据库 |
 | Hutool | 5.8.40 | 工具库 |
-| ip2region | 3.3.6 | 离线 IP 地理位置查询 |
-| NextDoc4j | 1.0.0 | API 文档自动生成 |
+| ip2region | 3.3.6  | 离线 IP 地理位置查询 |
+| NextDoc4j | 1.1.7  | API 文档自动生成 |
 
 ## 核心功能
 
@@ -71,7 +71,6 @@ src/main/java/ai/skills/api
 │   ├── ratelimit                   #   分布式限流（注解 + 拦截器 + Redis 存储）
 │   ├── redis                       #   Redis 工具类（锁、缓存、发布订阅）
 │   └── web                         #   Web 层（链路追踪 Filter）
-├── demo                            # 演示接口
 ├── hotsearch                       # 热搜采集模块
 │   ├── collector                   #   平台采集器（百度、微博、抖音、头条）
 │   │   └── model                   #     API 响应模型
@@ -144,14 +143,21 @@ spring:
 
 ### 4. API 文档
 
-启动成功后，访问 API 文档页面：http://localhost:8080/doc.html
+项目集成了 **NextDoc4j** API 文档框架，启动成功后访问：
+- 文档页面：http://localhost:8080/doc.html
+
+#### 文档注解说明
+
+| 注解 | 位置 | 说明 |
+|------|------|------|
+| `@Tag` | Controller 类 | 接口分组名称 |
+| `@Operation` | Controller 方法 | 接口详细描述 |
+| `@Schema` | Model 类/字段 | 数据模型描述 |
+| `@Hidden` | Controller/方法 | 隐藏接口（如健康检查） |
 
 ### 5. 验证
 
 ```bash
-# 健康检查
-curl http://localhost:8080/api/v1/demo/ping
-
 # 获取百度热搜
 curl http://localhost:8080/api/v1/hot-search/baidu/latest
 
@@ -286,14 +292,6 @@ curl "http://localhost:8080/api/almanac"
   "timestamp": "2026-03-13T10:00:00"
 }
 ```
-
-### 演示接口
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/demo/ping` | 健康检查 |
-| POST | `/api/v1/demo/tasks` | 幂等任务创建（需 `X-Idempotency-Key` 请求头） |
-| GET | `/api/v1/demo/hot-search` | 限流演示（60 秒内限 2 次） |
 
 ### 响应格式
 
