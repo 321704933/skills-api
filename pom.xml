@@ -43,6 +43,8 @@
         <redisson.version>3.46.0</redisson.version>
         <ip2region.version>3.3.6</ip2region.version>
         <hutool.version>5.8.40</hutool.version>
+        <lunar.version>1.7.7</lunar.version>
+        <nextdoc4j.version>1.0.0</nextdoc4j.version>
     </properties>
 
     <dependencies>
@@ -92,6 +94,20 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-dfa</artifactId>
             <version>${hutool.version}</version>
+        </dependency>
+
+        <!-- 中国农历计算库 -->
+        <dependency>
+            <groupId>cn.6tail</groupId>
+            <artifactId>lunar</artifactId>
+            <version>${lunar.version}</version>
+        </dependency>
+
+        <!-- NextDoc4j API 文档 -->
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-springboot3-starter</artifactId>
+            <version>${nextdoc4j.version}</version>
         </dependency>
 
         <!-- 开发工具 -->

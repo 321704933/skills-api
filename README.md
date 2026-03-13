@@ -13,6 +13,7 @@
 | MySQL | 8.x | 关系型数据库 |
 | Hutool | 5.8.40 | 工具库 |
 | ip2region | 3.3.6 | 离线 IP 地理位置查询 |
+| NextDoc4j | 1.0.0 | API 文档自动生成 |
 
 ## 核心功能
 
@@ -141,7 +142,11 @@ spring:
 ./mvnw spring-boot:run
 ```
 
-### 4. 验证
+### 4. API 文档
+
+启动成功后，访问 API 文档页面：http://localhost:8080/doc.html
+
+### 5. 验证
 
 ```bash
 # 健康检查

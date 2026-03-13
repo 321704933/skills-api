@@ -59,3 +59,10 @@ skills-api:
       toutiao:
         enabled: true
         cron: "0 0/30 * * * ?"
+
+nextdoc:
+  enabled: true
+  title: Skills API
+  version: 1.0.0
+  description: 基于 Spring Boot 3 的轻量级 API 脚手架
+  doc-url: /doc.html
