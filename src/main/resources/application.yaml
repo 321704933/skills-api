@@ -60,9 +60,11 @@ skills-api:
         enabled: true
         cron: "0 0/30 * * * ?"
 
-nextdoc:
+nextdoc4j:
   enabled: true
-  title: Skills API
-  version: 1.0.0
-  description: 基于 Spring Boot 3 的轻量级 API 脚手架
-  doc-url: /doc.html
+  extension:
+    enabled: true
+    brand:
+      logo: classpath:brand/logo/logo.png
+      title: "Skills API 文档"
+      footer-text: "Copyright © 2026 skill-api"
