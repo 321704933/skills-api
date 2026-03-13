@@ -14,11 +14,6 @@ spring:
       password: 
       database: 15
       timeout: 5s
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
 
 skills-api:
   web:
