@@ -5,7 +5,9 @@ import ai.skills.api.common.api.ApiResponse;
 import ai.skills.api.common.config.WebProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -40,7 +42,7 @@ public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
      * @return 是否需要包装
      */
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
         boolean methodProducesBody = returnType.hasMethodAnnotation(ResponseBody.class);
         boolean classIsRestController = returnType.getContainingClass().isAnnotationPresent(RestController.class);
         return webProperties.isWrapSuccessResponse() && (methodProducesBody || classIsRestController);
@@ -60,11 +62,11 @@ public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public Object beforeBodyWrite(
             Object body,
-            MethodParameter returnType,
-            org.springframework.http.MediaType selectedContentType,
-            Class<? extends HttpMessageConverter<?>> selectedConverterType,
-            ServerHttpRequest request,
-            ServerHttpResponse response
+            @NonNull MethodParameter returnType,
+            @NonNull MediaType selectedContentType,
+            @NonNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response
     ) {
         if (body instanceof ApiResponse<?> || body instanceof ApiErrorResponse) {
             return body;
@@ -79,7 +81,7 @@ public class GlobalResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             try {
                 return objectMapper.writeValueAsString(wrapped);
             } catch (JsonProcessingException ex) {
-                throw new IllegalStateException("Failed to serialize response", ex);
+                throw new IllegalStateException("响应序列化失败", ex);
             }
         }
         return wrapped;
