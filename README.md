@@ -78,6 +78,7 @@ src/main/java/ai/skills/api
 │   ├── controller                  #   查询接口
 │   ├── entity                      #   数据库实体
 │   ├── mapper                      #   MyBatis-Plus Mapper
+│   ├── Platform.java               #   平台枚举
 │   └── service                     #   业务逻辑（持久化 + 缓存）
 ├── prose                           # 散文随机句子模块
 │   ├── controller                  #   查询接口
@@ -170,6 +171,9 @@ curl http://localhost:8080/api/v1/hot-search/douyin/latest
 # 获取头条热榜
 curl http://localhost:8080/api/v1/hot-search/toutiao/latest
 
+# 查询百度指定日期热搜
+curl "http://localhost:8080/api/v1/hot-search/baidu/history?date=2026-03-16"
+
 # 随机散文句子
 curl http://localhost:8080/api/v1/prose/random
 
@@ -192,10 +196,14 @@ curl "http://localhost:8080/api/almanac"
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/v1/hot-search/{platform}/latest` | 获取指定平台最新热搜 |
-| GET | `/api/v1/hot-search/{platform}/history?limit=50&offset=0` | 分页查询历史记录 |
-
-`platform` 可选值：`baidu`、`weibo`、`douyin`、`toutiao`
+| GET | `/api/v1/hot-search/baidu/latest` | 获取百度最新热搜 |
+| GET | `/api/v1/hot-search/baidu/history?date=2026-03-16` | 查询百度指定日期热搜 |
+| GET | `/api/v1/hot-search/weibo/latest` | 获取微博最新热搜 |
+| GET | `/api/v1/hot-search/weibo/history?date=2026-03-16` | 查询微博指定日期热搜 |
+| GET | `/api/v1/hot-search/douyin/latest` | 获取抖音最新热搜 |
+| GET | `/api/v1/hot-search/douyin/history?date=2026-03-16` | 查询抖音指定日期热搜 |
+| GET | `/api/v1/hot-search/toutiao/latest` | 获取今日头条最新热搜 |
+| GET | `/api/v1/hot-search/toutiao/history?date=2026-03-16` | 查询今日头条指定日期热搜 |
 
 ### 散文句子
 

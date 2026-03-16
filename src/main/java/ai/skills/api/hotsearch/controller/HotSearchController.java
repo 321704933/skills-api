@@ -1,17 +1,17 @@
 package ai.skills.api.hotsearch.controller;
 
 import ai.skills.api.hotsearch.HotSearchResult;
-import ai.skills.api.hotsearch.entity.HotSearchRecord;
+import ai.skills.api.hotsearch.Platform;
 import ai.skills.api.hotsearch.service.HotSearchService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.time.LocalDate;
 
 /**
  * 创建时间：2026/03/13
@@ -20,7 +20,6 @@ import java.util.List;
  */
 @Tag(name = "热搜数据")
 @RestController
-@RequestMapping("/api/v1/hot-search")
 public class HotSearchController {
 
     private final HotSearchService hotSearchService;
@@ -29,32 +28,91 @@ public class HotSearchController {
         this.hotSearchService = hotSearchService;
     }
 
+    // ==================== 百度热搜 ====================
+
     /**
-     * 功能：获取指定平台最新一批热搜数据（优先 Redis 缓存，缓存未命中回源数据库）。
-     *
-     * @param platform 平台标识（baidu / weibo / douyin / toutiao）
-     * @return 最新热搜结果
+     * 获取百度最新热搜
      */
-    @Operation(summary = "获取最新热搜", description = "获取指定平台最新的热搜数据，优先从Redis缓存获取")
-    @GetMapping("/{platform}/latest")
-    public HotSearchResult latest(@PathVariable String platform) {
-        return hotSearchService.getLatest(platform);
+    @Operation(summary = "百度最新热搜", description = "获取百度平台最新的热搜数据")
+    @GetMapping("/api/v1/hot-search/baidu/latest")
+    public HotSearchResult baiduLatest() {
+        return hotSearchService.getLatest(Platform.BAIDU);
     }
 
     /**
-     * 功能：分页查询指定平台的历史热搜记录。
-     *
-     * @param platform 平台标识
-     * @param limit    每页条数（默认 50）
-     * @param offset   偏移量（默认 0）
-     * @return 热搜记录列表
+     * 查询百度历史热搜
      */
-    @Operation(summary = "查询历史热搜", description = "分页查询指定平台的历史热搜记录")
-    @GetMapping("/{platform}/history")
-    public List<HotSearchRecord> history(
-            @PathVariable String platform,
-            @RequestParam(defaultValue = "50") int limit,
-            @RequestParam(defaultValue = "0") int offset) {
-        return hotSearchService.getHistory(platform, limit, offset);
+    @Operation(summary = "百度历史热搜", description = "查询百度平台指定日期的热搜记录")
+    @GetMapping("/api/v1/hot-search/baidu/history")
+    public HotSearchResult baiduHistory(
+            @Parameter(description = "查询日期，格式：yyyy-MM-dd")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        return hotSearchService.getByDate(Platform.BAIDU, date);
+    }
+
+    // ==================== 微博热搜 ====================
+
+    /**
+     * 获取微博最新热搜
+     */
+    @Operation(summary = "微博最新热搜", description = "获取微博平台最新的热搜数据")
+    @GetMapping("/api/v1/hot-search/weibo/latest")
+    public HotSearchResult weiboLatest() {
+        return hotSearchService.getLatest(Platform.WEIBO);
+    }
+
+    /**
+     * 查询微博历史热搜
+     */
+    @Operation(summary = "微博历史热搜", description = "查询微博平台指定日期的热搜记录")
+    @GetMapping("/api/v1/hot-search/weibo/history")
+    public HotSearchResult weiboHistory(
+            @Parameter(description = "查询日期，格式：yyyy-MM-dd")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        return hotSearchService.getByDate(Platform.WEIBO, date);
+    }
+
+    // ==================== 抖音热搜 ====================
+
+    /**
+     * 获取抖音最新热搜
+     */
+    @Operation(summary = "抖音最新热搜", description = "获取抖音平台最新的热搜数据")
+    @GetMapping("/api/v1/hot-search/douyin/latest")
+    public HotSearchResult douyinLatest() {
+        return hotSearchService.getLatest(Platform.DOUYIN);
+    }
+
+    /**
+     * 查询抖音历史热搜
+     */
+    @Operation(summary = "抖音历史热搜", description = "查询抖音平台指定日期的热搜记录")
+    @GetMapping("/api/v1/hot-search/douyin/history")
+    public HotSearchResult douyinHistory(
+            @Parameter(description = "查询日期，格式：yyyy-MM-dd")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        return hotSearchService.getByDate(Platform.DOUYIN, date);
+    }
+
+    // ==================== 今日头条热搜 ====================
+
+    /**
+     * 获取今日头条最新热搜
+     */
+    @Operation(summary = "今日头条最新热搜", description = "获取今日头条平台最新的热搜数据")
+    @GetMapping("/api/v1/hot-search/toutiao/latest")
+    public HotSearchResult toutiaoLatest() {
+        return hotSearchService.getLatest(Platform.TOUTIAO);
+    }
+
+    /**
+     * 查询今日头条历史热搜
+     */
+    @Operation(summary = "今日头条历史热搜", description = "查询今日头条平台指定日期的热搜记录")
+    @GetMapping("/api/v1/hot-search/toutiao/history")
+    public HotSearchResult toutiaoHistory(
+            @Parameter(description = "查询日期，格式：yyyy-MM-dd")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        return hotSearchService.getByDate(Platform.TOUTIAO, date);
     }
 }

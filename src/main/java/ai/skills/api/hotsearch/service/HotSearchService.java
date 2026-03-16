@@ -3,6 +3,7 @@ package ai.skills.api.hotsearch.service;
 import ai.skills.api.common.redis.RedisUtils;
 import ai.skills.api.hotsearch.HotSearchItem;
 import ai.skills.api.hotsearch.HotSearchResult;
+import ai.skills.api.hotsearch.Platform;
 import ai.skills.api.hotsearch.entity.HotSearchRecord;
 import ai.skills.api.hotsearch.mapper.HotSearchRecordMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -64,11 +66,12 @@ public class HotSearchService extends ServiceImpl<HotSearchRecordMapper, HotSear
      * 注意：如果 Redis 中存在旧格式的缓存数据（导致反序列化失败），
      * 会自动清理旧缓存并从数据库重新加载。
      *
-     * @param platform 平台标识
+     * @param platform 平台枚举
      * @return 热搜结果（无数据返回 null）
      */
-    public HotSearchResult getLatest(String platform) {
-        String redisKey = REDIS_KEY_PREFIX + platform + REDIS_KEY_SUFFIX;
+    public HotSearchResult getLatest(Platform platform) {
+        String platformCode = platform.getCode();
+        String redisKey = REDIS_KEY_PREFIX + platformCode + REDIS_KEY_SUFFIX;
         try {
             HotSearchResult cached = RedisUtils.getCacheObject(redisKey);
             if (cached != null) {
@@ -81,13 +84,13 @@ public class HotSearchService extends ServiceImpl<HotSearchRecordMapper, HotSear
         }
 
         // 缓存未命中或已清理，从数据库查询最新一批
-        LocalDateTime latestTime = getLatestCollectedAt(platform);
+        LocalDateTime latestTime = getLatestCollectedAt(platformCode);
         if (latestTime == null) {
             return null;
         }
 
         List<HotSearchRecord> records = list(new LambdaQueryWrapper<HotSearchRecord>()
-                .eq(HotSearchRecord::getPlatform, platform)
+                .eq(HotSearchRecord::getPlatform, platformCode)
                 .eq(HotSearchRecord::getCollectedAt, latestTime)
                 .orderByAsc(HotSearchRecord::getRankNum));
 
@@ -99,7 +102,7 @@ public class HotSearchService extends ServiceImpl<HotSearchRecordMapper, HotSear
                 .map(this::toItem)
                 .toList();
 
-        HotSearchResult result = new HotSearchResult(platform, items, latestTime);
+        HotSearchResult result = new HotSearchResult(platformCode, items, latestTime);
 
         // 回填缓存
         RedisUtils.setCacheObject(redisKey, result, CACHE_TTL);
@@ -107,19 +110,33 @@ public class HotSearchService extends ServiceImpl<HotSearchRecordMapper, HotSear
     }
 
     /**
-     * 功能：分页查询指定平台的历史热搜记录。
+     * 功能：查询指定平台指定日期的热搜记录。
      *
-     * @param platform 平台标识
-     * @param limit    每页条数
-     * @param offset   偏移量
-     * @return 热搜记录列表
+     * @param platform 平台枚举
+     * @param date     查询日期
+     * @return 热搜结果（无数据返回 null）
      */
-    public List<HotSearchRecord> getHistory(String platform, int limit, int offset) {
-        return list(new LambdaQueryWrapper<HotSearchRecord>()
-                .eq(HotSearchRecord::getPlatform, platform)
+    public HotSearchResult getByDate(Platform platform, LocalDate date) {
+        String platformCode = platform.getCode();
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = dayStart.plusDays(1);
+
+        List<HotSearchRecord> records = list(new LambdaQueryWrapper<HotSearchRecord>()
+                .eq(HotSearchRecord::getPlatform, platformCode)
+                .ge(HotSearchRecord::getCollectedAt, dayStart)
+                .lt(HotSearchRecord::getCollectedAt, dayEnd)
                 .orderByDesc(HotSearchRecord::getCollectedAt)
-                .orderByAsc(HotSearchRecord::getRankNum)
-                .last("LIMIT " + limit + " OFFSET " + offset));
+                .orderByAsc(HotSearchRecord::getRankNum));
+
+        if (records.isEmpty()) {
+            return null;
+        }
+
+        List<HotSearchItem> items = records.stream()
+                .map(this::toItem)
+                .toList();
+
+        return new HotSearchResult(platformCode, items, records.get(0).getCollectedAt());
     }
 
     /**
