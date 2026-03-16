@@ -1,3 +1,16 @@
+# 项目基础配置
+project:
+  name: Skills API
+  version: 1.0.0
+  description: 技能 API 服务，提供热搜采集、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历等功能接口。
+  contact:
+    name: Devil
+    email: 321704933@qq.com
+    url: https://github.com/devil-mao/skills-api
+  license:
+    name: Apache License 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
 spring:
   application:
     name: skills-api
@@ -65,6 +78,5 @@ nextdoc4j:
   extension:
     enabled: true
     brand:
-      logo: classpath:brand/logo/logo.png
-      title: "Skills API 文档"
-      footer-text: "Copyright © 2026 skill-api"
+      title: "SKILLS API 文档"
+      footer-text: "Copyright © 2026 SKILLS API"

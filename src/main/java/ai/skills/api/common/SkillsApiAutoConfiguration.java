@@ -1,10 +1,10 @@
 package ai.skills.api.common;
 
 import ai.skills.api.common.config.IdempotencyProperties;
+import ai.skills.api.common.config.ProjectProperties;
 import ai.skills.api.common.config.RateLimitProperties;
 import ai.skills.api.common.config.WebProperties;
 import ai.skills.api.hotsearch.config.SchedulerProperties;
-
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,11 +23,13 @@ import java.time.Clock;
         WebProperties.class,
         RateLimitProperties.class,
         IdempotencyProperties.class,
-        SchedulerProperties.class
+        SchedulerProperties.class,
+        ProjectProperties.class
 })
 @Import({
         ai.skills.api.common.config.RedisStorageConfig.class,
-        ai.skills.api.common.config.WebMvcConfig.class
+        ai.skills.api.common.config.WebMvcConfig.class,
+        ai.skills.api.common.config.SpringDocAutoConfig.class
 })
 public class SkillsApiAutoConfiguration {
 
