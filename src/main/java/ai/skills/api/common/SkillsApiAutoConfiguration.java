@@ -5,6 +5,7 @@ import ai.skills.api.common.config.ProjectProperties;
 import ai.skills.api.common.config.RateLimitProperties;
 import ai.skills.api.common.config.WebProperties;
 import ai.skills.api.hotsearch.config.SchedulerProperties;
+import ai.skills.api.image.config.ImageConvertProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,7 +25,8 @@ import java.time.Clock;
         RateLimitProperties.class,
         IdempotencyProperties.class,
         SchedulerProperties.class,
-        ProjectProperties.class
+        ProjectProperties.class,
+        ImageConvertProperties.class
 })
 @Import({
         ai.skills.api.common.config.RedisStorageConfig.class,

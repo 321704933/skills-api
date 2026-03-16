@@ -13,6 +13,7 @@
 | MySQL | 8.x    | 关系型数据库 |
 | Hutool | 5.8.40 | 工具库 |
 | ip2region | 3.3.6  | 离线 IP 地理位置查询 |
+| Batik | 1.18   | SVG 图片处理 |
 | NextDoc4j | 1.1.7  | API 文档自动生成 |
 
 ## 核心功能
@@ -59,6 +60,15 @@
 - **真实宜忌** — 基于 lunar-java 库的真实老黄历数据，每天结果一致
 - **详细黄历** — 包含星宿、彭祖百忌、神位方位、冲煞、纳音、月相等完整黄历信息
 
+### 图片格式转换
+
+- **多输入方式** — 支持文件上传、Base64 编码、URL 远程获取三种输入方式
+- **SVG 转换** — 基于 Apache Batik 实现 SVG 转 PNG/JPG
+- **光栅图片转换** — 支持 PNG/JPG 之间的格式互转
+- **尺寸调整** — 支持指定宽度/高度，可按比例自动计算
+- **质量控制** — 对于 JPG 等有损格式，支持自定义压缩质量（1-100）
+- **灵活输出** — 支持直接返回二进制流或 Base64 编码的 JSON 响应
+
 ## 项目结构
 
 ```
@@ -99,6 +109,11 @@ src/main/java/ai/skills/api
     ├── controller                  #   查询接口
     ├── model                       #   响应 Record
     └── service                     #   业务逻辑（农历/宜忌/吉凶方位）
+└── image                           # 图片转换模块
+    ├── config                      #   配置属性
+    ├── controller                  #   转换接口
+    ├── model                       #   枚举/响应 Record
+    └── service                     #   业务逻辑（SVG/光栅图片转换）
 ```
 
 ## 快速开始
@@ -188,6 +203,15 @@ curl "http://localhost:8080/api/v1/ip/query"
 
 # 今日黄历
 curl "http://localhost:8080/api/almanac"
+
+# 图片格式转换（文件上传）
+curl -X POST -F "file=@test.svg" -F "format=PNG" "http://localhost:8080/api/v1/image/convert" --output converted.png
+
+# 图片格式转换（Base64 输入，Base64 输出）
+curl -X POST -d "base64=$(cat image.b64)" -d "format=JPG" -d "quality=80" -d "output=base64" "http://localhost:8080/api/v1/image/convert"
+
+# 图片格式转换（URL 输入，指定尺寸）
+curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=800" "http://localhost:8080/api/v1/image/convert" --output converted.jpg
 ```
 
 ## API 接口
@@ -301,6 +325,49 @@ curl "http://localhost:8080/api/almanac"
 }
 ```
 
+### 图片格式转换
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/v1/image/convert` | 转换图片格式 |
+
+**请求参数（multipart/form-data）：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| file | MultipartFile | 否* | 上传的图片文件 |
+| base64 | String | 否* | Base64 编码的图片内容 |
+| url | String | 否* | 图片 URL 地址 |
+| format | String | 是 | 目标格式：PNG/JPG/WEBP |
+| width | Integer | 否 | 输出宽度（像素） |
+| height | Integer | 否 | 输出高度（像素） |
+| quality | Integer | 否 | 压缩质量 1-100，默认 85 |
+| output | String | 否 | 输出方式：binary（默认）/ base64 |
+
+*file、base64、url 三选一，至少提供一个
+
+**响应示例（output=base64）：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...",
+    "format": "PNG",
+    "width": 800,
+    "height": 600,
+    "size": 12345
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-16T10:00:00"
+}
+```
+
+**响应示例（output=binary）：**
+
+直接返回图片二进制流，Content-Type 为 `image/png`、`image/jpeg` 等。
+
 ### 响应格式
 
 ```json
@@ -334,6 +401,10 @@ skills-api:
       toutiao:
         enabled: true
         cron: "0 0/30 * * * ?"   # 每 30 分钟
+  image:
+    max-file-size: 10485760      # 10MB
+    max-output-size: 52428800    # 50MB
+    default-quality: 85
 ```
 
 ## 开源协议
