@@ -62,6 +62,31 @@ skills-api:
     max-file-size: 10485760
     max-output-size: 52428800
     default-quality: 85
+  morning-news:
+    enabled: true
+    thread-pool-size: 2
+    categories:
+      general:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      finance:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      tech:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      sports:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      international:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      auto:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      game:
+        enabled: true
+        cron: "0 0 7 * * ?"
 
 nextdoc4j:
   enabled: true

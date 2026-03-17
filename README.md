@@ -1,6 +1,6 @@
 # Skills API
 
-基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、天气预报查询、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历、验证码生成校验、图片格式转换等实用功能。
+基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、多分类早报采集、天气预报查询、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历、验证码生成校验、图片格式转换等实用功能。
 
 ## 技术栈
 
@@ -32,6 +32,13 @@
 - **自动调度** — 基于 Cron 表达式的可配置定时任务，各平台独立调度互不影响
 - **微博免登录** — 自动生成访客 Cookie，无需手动配置登录凭证
 - **Redis 缓存** — 采集数据缓存至 Redis（2 小时 TTL），查询接口直接读取缓存
+
+### 早报数据采集
+
+- **多分类支持** — 综合、财经、科技、体育、国际、汽车、游戏 7 大分类早报数据采集
+- **数据来源** — 腾讯新闻早报 API，适配新版 JSON 结构（data.tabs[].articleList[]）
+- **自动调度** — 基于 Cron 表达式的可配置定时任务，各分类独立调度
+- **Redis 缓存** — 采集数据缓存至 Redis（2 小时 TTL），缓存为空时自动触发即时采集
 
 ### 天气预报查询
 
@@ -101,6 +108,11 @@ src/main/java/ai/skills/api
 │   └── web                             #   Web 层（链路追踪 Filter）
 ├── hotsearch                           # 热搜采集模块
 │   ├── collector                       #   平台采集器（百度、微博、抖音、头条）
+│   ├── config                          #   调度配置
+│   ├── controller                      #   查询接口
+│   └── service                         #   业务逻辑（Redis 缓存 + 查询）
+├── morningnews                         # 早报采集模块
+│   ├── collector                       #   分类采集器（综合、财经、科技、体育、国际、汽车、游戏）
 │   ├── config                          #   调度配置
 │   ├── controller                      #   查询接口
 │   └── service                         #   业务逻辑（Redis 缓存 + 查询）
@@ -199,6 +211,15 @@ curl http://localhost:8080/api/v1/hot-search/douyin/latest
 
 # 获取头条热榜
 curl http://localhost:8080/api/v1/hot-search/toutiao/latest
+
+# 获取综合早报
+curl http://localhost:8080/api/v1/morning-news/general/latest
+
+# 获取财经早报
+curl http://localhost:8080/api/v1/morning-news/finance/latest
+
+# 获取科技早报
+curl http://localhost:8080/api/v1/morning-news/tech/latest
 
 # 天气预报查询
 curl http://localhost:8080/api/v1/weather/北京
