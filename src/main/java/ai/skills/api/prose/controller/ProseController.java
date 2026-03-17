@@ -1,9 +1,10 @@
 package ai.skills.api.prose.controller;
 
-import ai.skills.api.prose.entity.ProseSentence;
+import ai.skills.api.prose.model.ProseSentenceResult;
 import ai.skills.api.prose.service.ProseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,13 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "散文句子")
 @RestController
 @RequestMapping("/api/v1/prose")
+@RequiredArgsConstructor
 public class ProseController {
 
     private final ProseService proseService;
 
-    public ProseController(ProseService proseService) {
-        this.proseService = proseService;
-    }
 
     /**
      * 功能：随机返回一条散文句子。
@@ -31,7 +30,7 @@ public class ProseController {
      */
     @Operation(summary = "随机句子", description = "随机返回一条散文句子")
     @GetMapping("/random")
-    public ProseSentence random() {
+    public ProseSentenceResult random() {
         return proseService.getRandomSentence();
     }
 }
