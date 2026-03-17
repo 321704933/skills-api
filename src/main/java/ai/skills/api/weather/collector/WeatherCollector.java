@@ -92,9 +92,9 @@ public class WeatherCollector {
             for (String key : obj.keySet()) {
                 cityCodeMap.put(key, obj.getStr(key));
             }
-            log.info("加载城市编码数据成功，共 {} 个城市", cityCodeMap.size());
+            log.info("城市编码加载完成，共 {} 个城市", cityCodeMap.size());
         } catch (Exception e) {
-            log.error("加载城市编码数据失败", e);
+            log.error("城市编码加载失败", e);
         }
     }
 

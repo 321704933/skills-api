@@ -40,7 +40,7 @@ public class ProseService {
         try (InputStream is = new ClassPathResource(DATA_FILE).getInputStream()) {
             sentences = objectMapper.readValue(is, new TypeReference<>() {});
         }
-        log.info("散文句子库加载完成，共 {} 条", sentences.size());
+        log.info("散文句子加载完成，共 {} 条", sentences.size());
     }
 
     /**
