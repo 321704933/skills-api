@@ -1,35 +1,48 @@
 package ai.skills.api.sensitive.service;
 
-import ai.skills.api.sensitive.entity.SensitiveWord;
-import ai.skills.api.sensitive.mapper.SensitiveWordMapper;
 import ai.skills.api.sensitive.model.SensitiveCheckResult;
+import ai.skills.api.sensitive.model.SensitiveWordItem;
 import cn.hutool.dfa.WordTree;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
  * 创建时间：2026/03/13
- * 功能：违禁词服务层，启动时加载词库构建 DFA 树，提供高效文本检测。
+ * 功能：违禁词服务层，启动时从 JSON 文件加载词库构建 DFA 树，提供高效文本检测。
  * 作者：Devil
  */
 @Slf4j
 @Service
-public class SensitiveWordService extends ServiceImpl<SensitiveWordMapper, SensitiveWord> {
+public class SensitiveWordService {
+
+    private static final String DATA_FILE = "data/sensitive-words.json";
 
     private final WordTree wordTree = new WordTree();
 
+    private final ObjectMapper objectMapper;
+
+    public SensitiveWordService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     /**
-     * 功能：应用启动时从数据库加载全部违禁词，构建 DFA 词树。
+     * 功能：应用启动时从 JSON 文件加载全部违禁词，构建 DFA 词树。
      */
     @PostConstruct
-    public void init() {
-        List<SensitiveWord> words = list();
-        words.forEach(w -> wordTree.addWord(w.getWord()));
-        log.info("违禁词库加载完成，共 {} 个词", words.size());
+    public void init() throws IOException {
+        try (InputStream is = new ClassPathResource(DATA_FILE).getInputStream()) {
+            List<SensitiveWordItem> words = objectMapper.readValue(is, new TypeReference<>() {});
+            words.forEach(w -> wordTree.addWord(w.getWord()));
+            log.info("违禁词库加载完成，共 {} 个词", words.size());
+        }
     }
 
     /**
