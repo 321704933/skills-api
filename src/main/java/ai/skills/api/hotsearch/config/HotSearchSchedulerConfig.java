@@ -24,7 +24,7 @@ import java.util.Map;
  *     <li>遍历 {@code skills-api.scheduler.platforms} 配置</li>
  *     <li>按 Bean 名称匹配 {@link HotSearchCollector} 实现</li>
  *     <li>为匹配成功且已启用的平台注册定时采集任务</li>
- *     <li>采集结果通过 {@link HotSearchService} 入库并缓存至 Redis</li>
+ *     <li>采集结果通过 {@link HotSearchService} 缓存至 Redis</li>
  *     <li>单个平台采集失败不影响其他平台</li>
  * </ol>
  * 作者：Devil
@@ -94,7 +94,7 @@ public class HotSearchSchedulerConfig implements SchedulingConfigurer {
     }
 
     /**
-     * 功能：执行单个平台的热搜采集，通过 Service 持久化到数据库并缓存至 Redis，单个平台异常不影响其他平台。
+     * 功能：执行单个平台的热搜采集，通过 Service 缓存至 Redis，单个平台异常不影响其他平台。
      *
      * @param collector 采集器实例
      */
@@ -103,7 +103,7 @@ public class HotSearchSchedulerConfig implements SchedulingConfigurer {
         try {
             log.info("开始采集平台 [{}] 热搜数据", platform);
             HotSearchResult result = collector.collect();
-            hotSearchService.saveAndCache(result);
+            hotSearchService.cache(result);
         } catch (Exception e) {
             log.error("平台 [{}] 热搜采集失败", platform, e);
         }
