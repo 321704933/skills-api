@@ -1,7 +1,7 @@
 package ai.skills.api.weather.collector;
 
 import ai.skills.api.common.redis.RedisUtils;
-import ai.skills.api.weather.model.WeatherResponse;
+import ai.skills.api.weather.model.WeatherResult;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -50,7 +50,6 @@ public class WeatherCollector {
     private static final String SK_API_URL = "http://d1.weather.com.cn/sk_2d/{}.html";
 
 
-
     /**
      * d1 接口所需的 Referer 头
      */
@@ -84,11 +83,11 @@ public class WeatherCollector {
     }
 
     /**
-     * 从 city-code.json 加载城市编码数据
+     * 从 city-codes.json 加载城市编码数据
      */
     private void loadCityCodes() {
         try {
-            String json = ResourceUtil.readUtf8Str("weather/city-code.json");
+            String json = ResourceUtil.readUtf8Str("data/city-codes.json");
             JSONObject obj = JSONUtil.parseObj(json);
             for (String key : obj.keySet()) {
                 cityCodeMap.put(key, obj.getStr(key));
@@ -107,26 +106,9 @@ public class WeatherCollector {
     }
 
     /**
-     * 搜索城市编码（模糊匹配）
-     */
-    public List<String> searchCity(String keyword) {
-        List<String> result = new ArrayList<>();
-        String lowerKeyword = keyword.toLowerCase();
-        for (String city : cityCodeMap.keySet()) {
-            if (city.toLowerCase().contains(lowerKeyword)) {
-                result.add(city);
-                if (result.size() >= 10) {
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
      * 采集天气数据（优先读取缓存）
      */
-    public WeatherResponse collect(String cityName) {
+    public WeatherResult collect(String cityName) {
         String cityCode = getCityCode(cityName);
         if (cityCode == null) {
             log.warn("未找到城市编码: {}", cityName);
@@ -139,10 +121,10 @@ public class WeatherCollector {
      * 根据城市编码采集天气数据
      * 优先从 Redis 缓存读取，缓存未命中时采集并写入缓存
      */
-    public WeatherResponse collectByCode(String cityName, String cityCode) {
+    public WeatherResult collectByCode(String cityName, String cityCode) {
         // 1. 尝试从缓存获取
         String cacheKey = CACHE_KEY_PREFIX + cityCode;
-        WeatherResponse cached = RedisUtils.getCacheObject(cacheKey);
+        WeatherResult cached = RedisUtils.getCacheObject(cacheKey);
         if (cached != null) {
             log.debug("命中天气缓存: {} ({})", cityName, cityCode);
             return cached;
@@ -156,7 +138,7 @@ public class WeatherCollector {
             Document doc7d = Jsoup.connect(url7d).timeout(TIMEOUT_MS).get();
             Document doc1d = fetchPageSilently(url1d);
 
-            WeatherResponse result = buildWeatherResponse(cityName, cityCode, doc7d, doc1d);
+            WeatherResult result = buildWeatherResponse(cityName, cityCode, doc7d, doc1d);
 
             // 3. 写入缓存
             if (result != null) {
@@ -188,21 +170,21 @@ public class WeatherCollector {
     /**
      * 组装完整天气响应数据
      */
-    private WeatherResponse buildWeatherResponse(String cityName, String cityCode,
-                                                  Document doc7d, Document doc1d) {
+    private WeatherResult buildWeatherResponse(String cityName, String cityCode,
+                                               Document doc7d, Document doc1d) {
         // 1. 提取更新时间
         String updateTime = extractUpdateTime(doc7d);
 
         // 2. 解析实时天气（从 d1 接口获取）
-        WeatherResponse.CurrentWeather current = parseCurrentWeather(cityCode);
+        WeatherResult.CurrentWeather current = parseCurrentWeather(cityCode);
 
         // 3. 解析7天预报
-        List<WeatherResponse.DailyWeather> forecast = parseDailyForecast(doc7d);
+        List<WeatherResult.DailyWeather> forecast = parseDailyForecast(doc7d);
 
         // 4. 解析24小时观测数据（从今日详情页）
-        List<WeatherResponse.Observation> observations = parseObservations(doc1d);
+        List<WeatherResult.Observation> observations = parseObservations(doc1d);
 
-        return new WeatherResponse(cityName, cityCode, updateTime, current, forecast, observations);
+        return new WeatherResult(cityName, cityCode, updateTime, current, forecast, observations);
     }
 
     // ==================== 更新时间 ====================
@@ -226,7 +208,7 @@ public class WeatherCollector {
      *
      * @param cityCode 城市编码
      */
-    private WeatherResponse.CurrentWeather parseCurrentWeather(String cityCode) {
+    private WeatherResult.CurrentWeather parseCurrentWeather(String cityCode) {
         try {
             String url = StrUtil.format(SK_API_URL, cityCode);
             String response = cn.hutool.http.HttpRequest.get(url)
@@ -241,7 +223,7 @@ public class WeatherCollector {
             JSONObject dataSK = parseJsonpResponse(response);
             if (dataSK == null) return null;
 
-            return new WeatherResponse.CurrentWeather(
+            return new WeatherResult.CurrentWeather(
                     dataSK.getStr("temp", ""),
                     dataSK.getStr("weather", ""),
                     dataSK.getStr("WD", ""),
@@ -256,7 +238,6 @@ public class WeatherCollector {
             return null;
         }
     }
-
 
 
     /**
@@ -295,8 +276,8 @@ public class WeatherCollector {
      * 解析7天预报数据
      * 注意：页面第一天是"昨天"，需要跳过
      */
-    private List<WeatherResponse.DailyWeather> parseDailyForecast(Document doc) {
-        List<WeatherResponse.DailyWeather> result = new ArrayList<>();
+    private List<WeatherResult.DailyWeather> parseDailyForecast(Document doc) {
+        List<WeatherResult.DailyWeather> result = new ArrayList<>();
 
         // 1. 提取日期信息（跳过第一个，即昨天）
         List<String> dates = extractDates(doc);
@@ -341,12 +322,12 @@ public class WeatherCollector {
             String sunset = safeGet(sunsets, i);
 
             // 逐小时预报（hour3data 不包含昨天，索引从0开始对应今天）
-            List<WeatherResponse.HourlyWeather> hourly = parseHourlyForecast(doc, i);
+            List<WeatherResult.HourlyWeather> hourly = parseHourlyForecast(doc, i);
 
             // 生活指数
-            List<WeatherResponse.LifeIndex> lifeIndices = parseLifeIndices(doc, i);
+            List<WeatherResult.LifeIndex> lifeIndices = parseLifeIndices(doc, i);
 
-            result.add(new WeatherResponse.DailyWeather(
+            result.add(new WeatherResult.DailyWeather(
                     date, dayWeather, nightWeather,
                     tempHigh, tempLow,
                     dayWindDir, dayWindPower, nightWindDir, nightWindPower,
@@ -483,8 +464,8 @@ public class WeatherCollector {
      *
      * @param dayIndex 日期索引（0=今天，1=明天，2=后天...）
      */
-    private List<WeatherResponse.HourlyWeather> parseHourlyForecast(Document doc, int dayIndex) {
-        List<WeatherResponse.HourlyWeather> result = new ArrayList<>();
+    private List<WeatherResult.HourlyWeather> parseHourlyForecast(Document doc, int dayIndex) {
+        List<WeatherResult.HourlyWeather> result = new ArrayList<>();
 
         // 风向映射表（来自页面 JS 代码）
         String[] windDirNames = {"无持续风向", "东北风", "东风", "东南风", "南风",
@@ -518,8 +499,8 @@ public class WeatherCollector {
      * 解析新版逐小时预报格式
      * 格式: hour3data={"101010100": [["20260316200000","10","晴","n00","南风","3级"], ...]}
      */
-    private List<WeatherResponse.HourlyWeather> parseHourlyNewFormat(String scriptContent, int dayIndex) {
-        List<WeatherResponse.HourlyWeather> result = new ArrayList<>();
+    private List<WeatherResult.HourlyWeather> parseHourlyNewFormat(String scriptContent, int dayIndex) {
+        List<WeatherResult.HourlyWeather> result = new ArrayList<>();
 
         try {
             int startIdx = scriptContent.indexOf("var hour3data=") + "var hour3data=".length();
@@ -600,7 +581,7 @@ public class WeatherCollector {
                             String windDir = hourItem.getStr(4);
                             String windPower = hourItem.getStr(5);
 
-                            result.add(new WeatherResponse.HourlyWeather(
+                            result.add(new WeatherResult.HourlyWeather(
                                     time, weather, temp, windDir, windPower
                             ));
                         }
@@ -619,9 +600,9 @@ public class WeatherCollector {
      * 解析旧版逐小时预报格式
      * 格式: hour3data=[[{ja:"00",jb:"7",jc:"0",jd:"4",je:"0",jf:"2026031608"}, ...], ...]
      */
-    private List<WeatherResponse.HourlyWeather> parseHourlyOldFormat(String scriptContent, int dayIndex,
-                                                                      String[] windDirNames, String[] windPowerNames) {
-        List<WeatherResponse.HourlyWeather> result = new ArrayList<>();
+    private List<WeatherResult.HourlyWeather> parseHourlyOldFormat(String scriptContent, int dayIndex,
+                                                                   String[] windDirNames, String[] windPowerNames) {
+        List<WeatherResult.HourlyWeather> result = new ArrayList<>();
 
         try {
             int startIdx = scriptContent.indexOf("var hour3data=") + "var hour3data=".length();
@@ -667,7 +648,7 @@ public class WeatherCollector {
                         String windDirection = resolveMapping(windDirIndex, windDirNames);
                         String windPower = resolveMapping(windPowerIndex, windPowerNames);
 
-                        result.add(new WeatherResponse.HourlyWeather(
+                        result.add(new WeatherResult.HourlyWeather(
                                 time, weather, temp, windDirection, windPower
                         ));
                     }
@@ -688,8 +669,8 @@ public class WeatherCollector {
      *
      * @param dayIndex 日期索引（0=今天，1=明天...）
      */
-    private List<WeatherResponse.LifeIndex> parseLifeIndices(Document doc, int dayIndex) {
-        List<WeatherResponse.LifeIndex> result = new ArrayList<>();
+    private List<WeatherResult.LifeIndex> parseLifeIndices(Document doc, int dayIndex) {
+        List<WeatherResult.LifeIndex> result = new ArrayList<>();
 
         // 生活指数在新版页面中用 div.lv 显示，每个 div.lv 是一天
         Elements lvDivs = doc.select("div.lv");
@@ -727,7 +708,7 @@ public class WeatherCollector {
                 // 名称
                 String name = i < names.size() ? names.get(i) : "";
 
-                result.add(new WeatherResponse.LifeIndex(name, level, desc));
+                result.add(new WeatherResult.LifeIndex(name, level, desc));
             }
         }
 
@@ -740,8 +721,8 @@ public class WeatherCollector {
      * 解析过去24小时整点观测数据
      * 数据来源：今日详情页的 observe24h JavaScript 变量
      */
-    private List<WeatherResponse.Observation> parseObservations(Document doc) {
-        List<WeatherResponse.Observation> result = new ArrayList<>();
+    private List<WeatherResult.Observation> parseObservations(Document doc) {
+        List<WeatherResult.Observation> result = new ArrayList<>();
 
         if (doc == null) return result;
 
@@ -774,7 +755,7 @@ public class WeatherCollector {
                     if (od2 != null) {
                         for (int i = 0; i < od2.size(); i++) {
                             JSONObject item = od2.getJSONObject(i);
-                            result.add(new WeatherResponse.Observation(
+                            result.add(new WeatherResult.Observation(
                                     item.getStr("od21", ""),   // 时间（整点）
                                     item.getStr("od22", ""),   // 温度
                                     item.getStr("od24", ""),   // 风向
