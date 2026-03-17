@@ -55,6 +55,9 @@ skills-api:
       toutiao:
         enabled: true
         cron: "0 0/30 * * * ?"
+      bilibili:
+        enabled: true
+        cron: "0 */30 * * * ?"
   image:
     max-file-size: 10485760
     max-output-size: 52428800

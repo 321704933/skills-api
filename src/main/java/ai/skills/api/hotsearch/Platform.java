@@ -15,7 +15,8 @@ public enum Platform {
     BAIDU("baidu", "百度"),
     WEIBO("weibo", "微博"),
     DOUYIN("douyin", "抖音"),
-    TOUTIAO("toutiao", "今日头条");
+    TOUTIAO("toutiao", "今日头条"),
+    BILIBILI("bilibili", "哔哩哔哩");
 
     /**
      * 平台标识

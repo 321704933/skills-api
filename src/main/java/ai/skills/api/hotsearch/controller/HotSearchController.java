@@ -58,4 +58,13 @@ public class HotSearchController {
     public HotSearchResult toutiaoLatest() {
         return hotSearchService.getLatest(Platform.TOUTIAO);
     }
+
+    /**
+     * 获取哔哩哔哩最新热门视频
+     */
+    @Operation(summary = "哔哩哔哩最新热门视频", description = "获取哔哩哔哩平台最新的热门视频数据")
+    @GetMapping("/bilibili/latest")
+    public HotSearchResult bilibiliLatest() {
+        return hotSearchService.getLatest(Platform.BILIBILI);
+    }
 }
