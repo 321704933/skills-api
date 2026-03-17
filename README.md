@@ -1,6 +1,6 @@
 # Skills API
 
-基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、天气预报查询、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历、图片格式转换等实用功能。
+基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、天气预报查询、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历、验证码生成校验、图片格式转换等实用功能。
 
 ## 技术栈
 
@@ -70,6 +70,14 @@
 - **真实宜忌** — 基于 lunar-java 库的真实老黄历数据，每天结果一致
 - **详细黄历** — 包含星宿、彭祖百忌、神位方位、冲煞、纳音、月相等完整黄历信息
 
+### 验证码生成与校验
+
+- **多种类型** — 支持线干扰、圆圈干扰、扭曲干扰、GIF 动态验证码
+- **可配置参数** — 支持自定义验证码有效期（60-3600秒）、字符数（4-8位）、图片尺寸
+- **Redis 存储** — 验证码存储至 Redis，支持分布式部署
+- **一次性使用** — 验证码校验后自动删除，防止重复使用
+- **忽略大小写** — 校验时忽略大小写，提升用户体验
+
 ### 图片格式转换
 
 - **多输入方式** — 支持文件上传、Base64 编码、URL 远程获取三种输入方式
@@ -116,6 +124,10 @@ src/main/java/ai/skills/api
 │   ├── controller                      #   查询接口
 │   ├── model                           #   响应 Record
 │   └── service                         #   业务逻辑（农历/宜忌/吉凶方位）
+├── captcha                             # 验证码模块
+│   ├── controller                      #   生成/校验接口
+│   ├── model                           #   枚举/请求/响应 Record
+│   └── service                         #   业务逻辑（Hutool Captcha + Redis 存储）
 └── image                               # 图片转换模块
     ├── config                          #   配置属性
     ├── controller                      #   转换接口
@@ -205,6 +217,15 @@ curl "http://localhost:8080/api/v1/ip/query"
 
 # 今日黄历
 curl http://localhost:8080/api/v1/almanac/almanac
+
+# 验证码生成（默认配置）
+curl http://localhost:8080/api/v1/captcha/generate
+
+# 验证码生成（自定义配置）
+curl -X POST -H "Content-Type: application/json" -d '{"type":"circle","ttl":600,"length":6,"width":150,"height":50}' http://localhost:8080/api/v1/captcha/generate
+
+# 验证码校验
+curl -X POST -H "Content-Type: application/json" -d '{"captchaId":"your-captcha-id","captcha":"ABCD"}' http://localhost:8080/api/v1/captcha/verify
 
 # 图片格式转换（文件上传）
 curl -X POST -F "file=@test.svg" -F "format=PNG" "http://localhost:8080/api/v1/image/convert" --output converted.png
@@ -385,6 +406,65 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
   },
   "traceId": "a1b2c3d4e5f6",
   "timestamp": "2026-03-13T02:00:00Z"
+}
+```
+
+### 验证码生成与校验
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/captcha/generate` | 生成验证码（默认配置） |
+| POST | `/api/v1/captcha/generate` | 生成验证码（自定义配置） |
+| POST | `/api/v1/captcha/verify` | 校验验证码 |
+
+**生成验证码请求参数（POST，JSON Body）：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| type | String | 否 | 验证码类型：line（线干扰，默认）、circle（圆圈干扰）、shear（扭曲干扰）、gif（GIF 动态） |
+| ttl | Integer | 否 | 有效期（秒），60-3600，默认 300 |
+| length | Integer | 否 | 验证码位数，4-8，默认 4 |
+| width | Integer | 否 | 图片宽度（像素），默认 120 |
+| height | Integer | 否 | 图片高度（像素），默认 40 |
+
+**生成验证码响应示例：**
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "success",
+  "status": "SUCCESS",
+  "data": {
+    "captchaId": "550e8400-e29b-41d4-a716-446655440000",
+    "imageBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-17T02:00:00Z"
+}
+```
+
+**校验验证码请求参数（POST，JSON Body）：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| captchaId | String | 是 | 验证码唯一标识 |
+| captcha | String | 是 | 用户输入的验证码 |
+
+**校验验证码响应示例：**
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "success",
+  "status": "SUCCESS",
+  "data": {
+    "valid": true,
+    "message": "验证码校验通过"
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-17T02:00:00Z"
 }
 ```
 

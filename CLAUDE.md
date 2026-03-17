@@ -41,6 +41,7 @@ src/main/java/ai/skills/api/
 ├── sensitive/        # 敏感词检测（Hutool DFA 算法，内存加载 JSON）
 ├── ip/               # IP 地理位置（ip2region 离线库，内存查询）
 ├── fortune/          # 今日黄历（lunar-java 农历计算）
+├── captcha/          # 验证码生成与校验（Hutool Captcha，Redis 存储）
 └── image/            # 图片格式转换（SVG/PNG/JPG/WEBP，Apache Batik + ImageIO）
 ```
 
@@ -66,6 +67,7 @@ src/main/java/ai/skills/api/
 | sensitive | `resources/data/sensitive-words.json` | 启动时构建 DFA WordTree |
 | ip | `resources/ip2region/ip2region.xdb` | 启动时加载到内存 |
 | fortune | lunar-java 计算 | 无缓存，实时计算 |
+| captcha | Hutool Captcha 生成 | Redis，可配置 TTL（默认 5 分钟） |
 | image | 用户上传/URL/Base64 | 无缓存 |
 
 ### 配置前缀
