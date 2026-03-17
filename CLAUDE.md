@@ -54,7 +54,8 @@ src/main/java/ai/skills/api
 ├── prose/            # 散文随机句子模块
 ├── sensitive/        # 违禁词检测模块（DFA 算法）
 ├── ip/               # IP 地理位置查询模块（ip2region）
-└── fortune/          # 今日黄历模块（lunar-java）
+├── fortune/          # 今日黄历模块（lunar-java）
+└── weather/          # 天气预报模块（weather.com.cn 采集 + Redis 缓存）
 ```
 
 ### 核心基础设施

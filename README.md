@@ -1,6 +1,6 @@
 # Skills API
 
-基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集与散文随机句子等趣味功能。
+基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、天气预报查询、散文随机句子等趣味功能。
 
 ## 技术栈
 
@@ -33,6 +33,17 @@
 - **微博免登录** — 自动生成访客 Cookie，无需手动配置登录凭证
 - **两级缓存** — Redis 缓存（2 小时 TTL）+ MySQL 持久化，优先读缓存
 - **每日去重** — 同平台每天仅保留最新一批数据，自动清理旧批次
+
+### 天气预报查询
+
+- **全面数据采集** — 从中国天气网采集实时天气、7 天预报、逐小时预报、24 小时观测和生活指数
+- **实时天气** — 温度、天气状况、风向风力、湿度、降水量、气压（来自 d1.weather.com.cn 接口）
+- **分日预报** — 7 天预报含白天/夜间天气、温度高低、风向风力、日出日落
+- **逐小时预报** — 每日逐小时温度、天气、风向风力变化趋势
+- **24 小时观测** — 过去 24 小时整点温度、湿度、风力实测数据
+- **生活指数** — 紫外线、穿衣、洗车、运动、过敏、空气污染扩散等
+- **两级缓存** — Redis 缓存（10 分钟 TTL）+ 内存城市编码映射，首次查询后极速响应
+- **接口限流** — 基于 `@RateLimited` 注解限制天气查询 30 次/分钟
 
 ### 散文随机句子
 
@@ -114,6 +125,10 @@ src/main/java/ai/skills/api
     ├── controller                  #   转换接口
     ├── model                       #   枚举/响应 Record
     └── service                     #   业务逻辑（SVG/光栅图片转换）
+└── weather                         # 天气预报模块
+    ├── collector                   #   数据采集器（weather.com.cn + d1 接口）
+    ├── controller                  #   查询接口
+    └── model                       #   响应 Record（含 6 个嵌套数据类型）
 ```
 
 ## 快速开始
@@ -212,6 +227,18 @@ curl -X POST -d "base64=$(cat image.b64)" -d "format=JPG" -d "quality=80" -d "ou
 
 # 图片格式转换（URL 输入，指定尺寸）
 curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=800" "http://localhost:8080/api/v1/image/convert" --output converted.jpg
+
+# 天气预报查询（按城市名）
+curl http://localhost:8080/api/v1/weather/北京
+
+# 天气预报查询（按城市编码）
+curl http://localhost:8080/api/v1/weather/code/101010100
+
+# 搜索城市
+curl "http://localhost:8080/api/v1/weather/search?keyword=北"
+
+# 获取城市编码
+curl "http://localhost:8080/api/v1/weather/code?city=北京"
 ```
 
 ## API 接口
@@ -367,6 +394,66 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 **响应示例（output=binary）：**
 
 直接返回图片二进制流，Content-Type 为 `image/png`、`image/jpeg` 等。
+
+### 天气预报查询
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/weather/{city}` | 根据城市名查询完整天气数据 |
+| GET | `/api/v1/weather/code/{cityCode}` | 根据城市编码查询完整天气数据 |
+| GET | `/api/v1/weather/search?keyword=北` | 搜索城市名称 |
+| GET | `/api/v1/weather/code?city=北京` | 获取城市编码 |
+
+**响应示例：**
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "city": "北京",
+    "cityCode": "101010100",
+    "updateTime": "18:00",
+    "current": {
+      "temp": "10.5",
+      "weather": "晴",
+      "windDirection": "南风",
+      "windPower": "2级",
+      "humidity": "39%",
+      "rain": "0",
+      "pressure": "1018",
+      "time": "22:50"
+    },
+    "forecast": [
+      {
+        "date": "16日",
+        "dayWeather": "晴",
+        "nightWeather": "多云",
+        "tempHigh": "14",
+        "tempLow": "2",
+        "dayWindDirection": "南风",
+        "dayWindPower": "3-4级",
+        "nightWindDirection": "南风",
+        "nightWindPower": "<3级",
+        "sunrise": "06:22",
+        "sunset": "18:22",
+        "hourly": [
+          { "time": "20:00", "weather": "晴", "temp": "10", "windDirection": "南风", "windPower": "<3级" }
+        ],
+        "lifeIndices": [
+          { "name": "紫外线", "level": "弱", "description": "辐射较弱，涂擦SPF12-15、PA+护肤品。" },
+          { "name": "穿衣", "level": "较冷", "description": "建议着厚外套加毛衣等服装。" }
+        ]
+      }
+    ],
+    "observations": [
+      { "hour": "22", "temp": "8.2", "windDirection": "东南风", "windPower": "2", "humidity": "44" }
+    ]
+  },
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-16T23:00:00"
+}
+```
 
 ### 响应格式
 
