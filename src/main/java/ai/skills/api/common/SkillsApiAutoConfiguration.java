@@ -1,9 +1,6 @@
 package ai.skills.api.common;
 
-import ai.skills.api.common.config.IdempotencyProperties;
-import ai.skills.api.common.config.ProjectProperties;
-import ai.skills.api.common.config.RateLimitProperties;
-import ai.skills.api.common.config.WebProperties;
+import ai.skills.api.common.config.*;
 import ai.skills.api.hotsearch.config.SchedulerProperties;
 import ai.skills.api.image.config.ImageConvertProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -29,9 +26,9 @@ import java.time.Clock;
         ImageConvertProperties.class
 })
 @Import({
-        ai.skills.api.common.config.RedisStorageConfig.class,
-        ai.skills.api.common.config.WebMvcConfig.class,
-        ai.skills.api.common.config.SpringDocAutoConfig.class
+        RedisStorageConfig.class,
+        WebMvcConfig.class,
+        SpringDocAutoConfig.class
 })
 public class SkillsApiAutoConfiguration {
 

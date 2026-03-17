@@ -4,6 +4,7 @@ import ai.skills.api.fortune.model.AlmanacResult;
 import ai.skills.api.fortune.service.AlmanacService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,14 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "今日黄历")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/almanac")
+@RequiredArgsConstructor
 public class AlmanacController {
 
     private final AlmanacService almanacService;
-
-    public AlmanacController(AlmanacService almanacService) {
-        this.almanacService = almanacService;
-    }
 
     /**
      * 功能：获取今日黄历（基于真实老黄历数据）

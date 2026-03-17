@@ -9,7 +9,7 @@ import java.util.List;
  * 功能：今日黄历查询结果（基于真实农历数据）。
  * 作者：Devil
  */
-@Schema(name = "今日黄历", description = "今日黄历详细信息")
+@Schema(name = "今日黄历结果", description = "今日黄历详细信息")
 public record AlmanacResult(
         @Schema(description = "公历日期", example = "2026-03-13")
         String date,

@@ -7,9 +7,8 @@ import ai.skills.api.image.service.ImageConvertService;
 import ai.skills.api.image.service.ImageConvertService.ConversionContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -29,15 +29,12 @@ import java.time.format.DateTimeFormatter;
 @Tag(name = "图片转换")
 @RestController
 @RequestMapping("/api/v1/image")
+@RequiredArgsConstructor
 public class ImageConvertController {
 
     private static final DateTimeFormatter FILENAME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     private final ImageConvertService imageConvertService;
-
-    public ImageConvertController(ImageConvertService imageConvertService) {
-        this.imageConvertService = imageConvertService;
-    }
 
     /**
      * 功能：转换图片格式，支持 SVG 转 PNG/JPG/WEBP 以及光栅图片之间的互转。
