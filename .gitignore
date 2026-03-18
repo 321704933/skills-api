@@ -7,7 +7,6 @@ target/
 .claude
 web/node_modules
 web/dist
-packager
 
 ### STS ###
 .apt_generated
