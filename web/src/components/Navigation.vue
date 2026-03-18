@@ -63,6 +63,14 @@ onUnmounted(() => {
             API 文档
           </a>
           <a
+            href="http://106.54.172.129:8080/doc.html"
+            target="_blank"
+            rel="noopener"
+            class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            在线调试
+          </a>
+          <a
             href="https://github.com/321704933/skills-api"
             target="_blank"
             rel="noopener"

@@ -36,7 +36,7 @@ import { Github, FileText, Heart, Zap } from 'lucide-vue-next'
             GitHub
           </a>
           <a
-            href="http://localhost:8080/doc.html"
+            href="http://106.54.172.129:8080/doc.html"
             target="_blank"
             rel="noopener"
             class="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"

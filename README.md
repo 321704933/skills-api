@@ -1,20 +1,32 @@
 # Skills API
 
-基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、多分类早报采集、天气预报查询、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历、验证码生成校验、图片格式转换等实用功能。
+<!-- 徽章区域 -->
+<div align="center">
+
+[![Linux Do](https://img.shields.io/badge/LINUX-DO-FFB003.svg?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9Ijg5NnB4IiBoZWlnaHQ9Ijg5NnB4IiBzdHlsZT0ic2hhcGUtcmVuZGVyaW5nOmdlb21ldHJpY1ByZWNpc2lvbjsgdGV4dC1yZW5kZXJpbmc6Z2VvbWV0cmljUHJlY2lzaW9uOyBpbWFnZS1yZW5kZXJpbmc6b3B0aW1pemVRdWFsaXR5OyBmaWxsLXJ1bGU6ZXZlbm9kZDsgY2xpcC1ydWxlOmV2ZW5vZGQiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4NCjxnPjxwYXRoIHN0eWxlPSJvcGFjaXR5OjEiIGZpbGw9IiNlY2VjZWMiIGQ9Ik0gNDE5LjUsLTAuNSBDIDQzOC4xNjcsLTAuNSA0NTYuODMzLC0wLjUgNDc1LjUsLTAuNUMgNjE4LjY3OCwxMS44MTUyIDczMi4xNzgsNzUuODE1MiA4MTYsMTkxLjVDIDg2My4wODgsMjYwLjI2MiA4ODkuNTg4LDMzNi4yNjIgODk1LjUsNDE5LjVDIDg5NS41LDQzOC4xNjcgODk1LjUsNDU2LjgzMyA4OTUuNSw0NzUuNUMgODgzLjE4NSw2MTguNjc4IDgxOS4xODUsNzMyLjE3OCA3MDMuNSw4MTZDIDYzNC43MzgsODYzLjA4OCA1NTguNzM4LDg4OS41ODggNDc1LjUsODk1LjVDIDQ1Ni44MzMsODk1LjUgNDM4LjE2Nyw4OTUuNSA0MTkuNSw4OTUuNUMgMjc2LjMyMiw4ODMuMTg1IDE2Mi44MjIsODE5LjE4NSA3OSw3MDMuNUMgMzIuMTIxMyw2MzUuMDMzIDUuNjIxMjcsNTU5LjM2NyAtMC41LDQ3Ni41QyAtMC41LDQ1Ny4xNjcgLTAuNSw0MzcuODMzIC0wLjUsNDE4LjVDIDEyLjIwMTUsMjc1Ljc5IDc2LjIwMTUsMTYyLjYyNCAxOTEuNSw3OUMgMjYwLjI2MiwzMS45MTIgMzM2LjI2Miw1LjQxMjAyIDQxOS41LC0wLjUgWiIvPjwvZz4NCjxnPjxwYXRoIHN0eWxlPSJvcGFjaXR5OjEiIGZpbGw9IiMxOTE5MTkiIGQ9Ik0gNDIzLjUsMjYuNSBDIDU1OC4wNjcsMjIuNTk5IDY3MC45LDY5LjU5OSA3NjIsMTY3LjVDIDc4Ni4yMTksMTk1LjIzNyA4MDYuNzE5LDIyNS41NyA4MjMuNSwyNTguNUMgNTcyLjgzMywyNTkuODMzIDMyMi4xNjcsMjU5LjgzMyA3MS41LDI1OC41QyAxMjkuNzU1LDE0Ny4zMjYgMjE5LjQyMSw3NC40OTI5IDM0MC41LDQwQyAzNjcuOTQ3LDMzLjM0NTcgMzk1LjYxNCwyOC44NDU3IDQyMy41LDI2LjUgWiIvPjwvZz4NCjxnPjxwYXRoIHN0eWxlPSJvcGFjaXR5OjEiIGZpbGw9IiNmOWFmMDAiIGQ9Ik0gNzEuNSw2MzUuNSBDIDMyMi4xNjgsNjM1LjE2NyA1NzIuODM0LDYzNS41IDgyMy41LDYzNi41QyA3NzIuODIyLDczNC42NzMgNjk1LjgyMiw4MDMuNTA2IDU5Mi41LDg0M0MgNDgwLjE3Myw4ODIuMDkxIDM3MC4xNzMsODc2LjQyNCAyNjIuNSw4MjZDIDE3Ny42NTEsNzgzLjY1MSAxMTMuOTg0LDcyMC4xNTEgNzEuNSw2MzUuNSBaIi8+PC9nPg0KPC9zdmc+)](https://linux.do)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.11-brightgreen?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![API Count](https://img.shields.io/badge/APIs-20+-blue?logo=swagger&logoColor=white)](http://106.54.172.129:8080/doc.html)
+[![GitHub Stars](https://img.shields.io/github/stars/321704933/skills-api?style=social&logo=github)](https://github.com/321704933/skills-api)
+
+</div>
+
+基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集、多分类早报采集、天气预报查询、散文随机句子、违禁词检测、IP
+地理位置查询、今日黄历、验证码生成校验、图片格式转换等实用功能。
 
 ## 技术栈
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| Java | 21 | LTS 版本 |
-| Spring Boot | 3.5.11 | Web 框架 |
-| Redisson | 3.46.0 | Redis 客户端（分布式锁、限流、缓存） |
-| Hutool | 5.8.40 | 工具库（HTTP、JSON、DFA 词树） |
-| Jsoup | 1.18.1 | HTML 解析（天气数据采集） |
-| ip2region | 3.3.6 | 离线 IP 地理位置查询 |
-| lunar-java | 1.7.7 | 中国农历计算（黄历数据） |
-| Batik | 1.18 | SVG 图片处理 |
-| NextDoc4j | 1.1.7 | API 文档自动生成 |
+| 组件          | 版本     | 说明                    |
+|-------------|--------|-----------------------|
+| Java        | 21     | LTS 版本                |
+| Spring Boot | 3.5.11 | Web 框架                |
+| Redisson    | 3.46.0 | Redis 客户端（分布式锁、限流、缓存） |
+| Hutool      | 5.8.40 | 工具库（HTTP、JSON、DFA 词树） |
+| Jsoup       | 1.18.1 | HTML 解析（天气数据采集）       |
+| ip2region   | 3.3.6  | 离线 IP 地理位置查询          |
+| lunar-java  | 1.7.7  | 中国农历计算（黄历数据）          |
+| Batik       | 1.18   | SVG 图片处理              |
+| NextDoc4j   | 1.1.7  | API 文档自动生成            |
 
 ## 核心功能
 
@@ -200,16 +212,17 @@ spring:
 ### 3. API 文档
 
 项目集成了 **NextDoc4j** API 文档框架，启动成功后访问：
+
 - 文档页面：http://localhost:8080/doc.html
 
 #### 文档注解说明
 
-| 注解 | 位置 | 说明 |
-|------|------|------|
-| `@Tag` | Controller 类 | 接口分组名称 |
-| `@Operation` | Controller 方法 | 接口详细描述 |
-| `@Schema` | Model 类/字段 | 数据模型描述 |
-| `@Hidden` | Controller/方法 | 隐藏接口（如健康检查） |
+| 注解           | 位置            | 说明          |
+|--------------|---------------|-------------|
+| `@Tag`       | Controller 类  | 接口分组名称      |
+| `@Operation` | Controller 方法 | 接口详细描述      |
+| `@Schema`    | Model 类/字段    | 数据模型描述      |
+| `@Hidden`    | Controller/方法 | 隐藏接口（如健康检查） |
 
 ### 4. 验证
 
@@ -288,24 +301,24 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### 热搜查询
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/hot-search/baidu/latest` | 获取百度最新热搜 |
-| GET | `/api/v1/hot-search/weibo/latest` | 获取微博最新热搜 |
-| GET | `/api/v1/hot-search/douyin/latest` | 获取抖音最新热搜 |
+| 方法  | 路径                                  | 说明         |
+|-----|-------------------------------------|------------|
+| GET | `/api/v1/hot-search/baidu/latest`   | 获取百度最新热搜   |
+| GET | `/api/v1/hot-search/weibo/latest`   | 获取微博最新热搜   |
+| GET | `/api/v1/hot-search/douyin/latest`  | 获取抖音最新热搜   |
 | GET | `/api/v1/hot-search/toutiao/latest` | 获取今日头条最新热搜 |
 
 ### 天气预报查询
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| 方法  | 路径                       | 说明            |
+|-----|--------------------------|---------------|
 | GET | `/api/v1/weather/{city}` | 根据城市名查询完整天气数据 |
 
 ### 股票指数行情
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/stock-index` | 获取所有分组股票指数 |
+| 方法  | 路径                            | 说明                        |
+|-----|-------------------------------|---------------------------|
+| GET | `/api/v1/stock-index`         | 获取所有分组股票指数                |
 | GET | `/api/v1/stock-index/{group}` | 获取指定分组股票指数（a-share/hk/us） |
 
 **响应示例：**
@@ -379,16 +392,36 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
         "sunrise": "06:22",
         "sunset": "18:22",
         "hourly": [
-          { "time": "20:00", "weather": "晴", "temp": "10", "windDirection": "南风", "windPower": "<3级" }
+          {
+            "time": "20:00",
+            "weather": "晴",
+            "temp": "10",
+            "windDirection": "南风",
+            "windPower": "<3级"
+          }
         ],
         "lifeIndices": [
-          { "name": "紫外线", "level": "弱", "description": "辐射较弱，涂擦SPF12-15、PA+护肤品。" },
-          { "name": "穿衣", "level": "较冷", "description": "建议着厚外套加毛衣等服装。" }
+          {
+            "name": "紫外线",
+            "level": "弱",
+            "description": "辐射较弱，涂擦SPF12-15、PA+护肤品。"
+          },
+          {
+            "name": "穿衣",
+            "level": "较冷",
+            "description": "建议着厚外套加毛衣等服装。"
+          }
         ]
       }
     ],
     "observations": [
-      { "hour": "22", "temp": "8.2", "windDirection": "东南风", "windPower": "2", "humidity": "44" }
+      {
+        "hour": "22",
+        "temp": "8.2",
+        "windDirection": "东南风",
+        "windPower": "2",
+        "humidity": "44"
+      }
     ]
   },
   "traceId": "a1b2c3d4e5f6",
@@ -398,14 +431,14 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### 散文句子
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| 方法  | 路径                     | 说明         |
+|-----|------------------------|------------|
 | GET | `/api/v1/prose/random` | 随机返回一条散文句子 |
 
 ### 违禁词检测
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| 方法  | 路径                                      | 说明          |
+|-----|-----------------------------------------|-------------|
 | GET | `/api/v1/sensitive/check?text=要检查的文本内容` | 检测文本是否包含违禁词 |
 
 **响应示例：**
@@ -418,7 +451,10 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
   "status": "SUCCESS",
   "data": {
     "hasSensitive": true,
-    "foundWords": ["免费领取", "加微信"],
+    "foundWords": [
+      "免费领取",
+      "加微信"
+    ],
     "filteredText": "****大奖，***了解详情"
   },
   "traceId": "a1b2c3d4e5f6",
@@ -428,10 +464,10 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### IP 地理位置查询
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/ip/query?ip=1.2.3.4` | 查询指定 IP 的地理位置 |
-| GET | `/api/v1/ip/query` | 自动获取调用者 IP 并查询 |
+| 方法  | 路径                            | 说明             |
+|-----|-------------------------------|----------------|
+| GET | `/api/v1/ip/query?ip=1.2.3.4` | 查询指定 IP 的地理位置  |
+| GET | `/api/v1/ip/query`            | 自动获取调用者 IP 并查询 |
 
 **响应示例：**
 
@@ -455,8 +491,8 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### 今日黄历
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| 方法  | 路径                        | 说明     |
+|-----|---------------------------|--------|
 | GET | `/api/v1/almanac/almanac` | 获取今日黄历 |
 
 **响应示例：**
@@ -474,8 +510,21 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
     "monthGanZhi": "辛卯",
     "dayGanZhi": "癸巳",
     "zodiac": "马",
-    "suitable": ["祭祀", "祈福", "求嗣", "开光", "塑绘"],
-    "avoid": ["开市", "交易", "立券", "动土", "破土", "安葬"],
+    "suitable": [
+      "祭祀",
+      "祈福",
+      "求嗣",
+      "开光",
+      "塑绘"
+    ],
+    "avoid": [
+      "开市",
+      "交易",
+      "立券",
+      "动土",
+      "破土",
+      "安葬"
+    ],
     "festivals": [],
     "jieQi": "惊蛰",
     "week": "星期五",
@@ -500,21 +549,21 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### 验证码生成与校验
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/captcha/generate` | 生成验证码（默认配置） |
+| 方法   | 路径                         | 说明           |
+|------|----------------------------|--------------|
+| GET  | `/api/v1/captcha/generate` | 生成验证码（默认配置）  |
 | POST | `/api/v1/captcha/generate` | 生成验证码（自定义配置） |
-| POST | `/api/v1/captcha/verify` | 校验验证码 |
+| POST | `/api/v1/captcha/verify`   | 校验验证码        |
 
 **生成验证码请求参数（POST，JSON Body）：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| type | String | 否 | 验证码类型：line（线干扰，默认）、circle（圆圈干扰）、shear（扭曲干扰）、gif（GIF 动态） |
-| ttl | Integer | 否 | 有效期（秒），60-3600，默认 300 |
-| length | Integer | 否 | 验证码位数，4-8，默认 4 |
-| width | Integer | 否 | 图片宽度（像素），默认 120 |
-| height | Integer | 否 | 图片高度（像素），默认 40 |
+| 参数     | 类型      | 必填 | 说明                                                      |
+|--------|---------|----|---------------------------------------------------------|
+| type   | String  | 否  | 验证码类型：line（线干扰，默认）、circle（圆圈干扰）、shear（扭曲干扰）、gif（GIF 动态） |
+| ttl    | Integer | 否  | 有效期（秒），60-3600，默认 300                                   |
+| length | Integer | 否  | 验证码位数，4-8，默认 4                                          |
+| width  | Integer | 否  | 图片宽度（像素），默认 120                                         |
+| height | Integer | 否  | 图片高度（像素），默认 40                                          |
 
 **生成验证码响应示例：**
 
@@ -535,10 +584,10 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 **校验验证码请求参数（POST，JSON Body）：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| captchaId | String | 是 | 验证码唯一标识 |
-| captcha | String | 是 | 用户输入的验证码 |
+| 参数        | 类型     | 必填 | 说明       |
+|-----------|--------|----|----------|
+| captchaId | String | 是  | 验证码唯一标识  |
+| captcha   | String | 是  | 用户输入的验证码 |
 
 **校验验证码响应示例：**
 
@@ -559,22 +608,22 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ### 图片格式转换
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| 方法   | 路径                      | 说明     |
+|------|-------------------------|--------|
 | POST | `/api/v1/image/convert` | 转换图片格式 |
 
 **请求参数（multipart/form-data）：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| file | MultipartFile | 否* | 上传的图片文件 |
-| base64 | String | 否* | Base64 编码的图片内容 |
-| url | String | 否* | 图片 URL 地址 |
-| format | String | 是 | 目标格式：PNG/JPG/WEBP |
-| width | Integer | 否 | 输出宽度（像素） |
-| height | Integer | 否 | 输出高度（像素） |
-| quality | Integer | 否 | 压缩质量 1-100，默认 85 |
-| output | String | 否 | 输出方式：binary（默认）/ base64 |
+| 参数      | 类型            | 必填 | 说明                      |
+|---------|---------------|----|-------------------------|
+| file    | MultipartFile | 否* | 上传的图片文件                 |
+| base64  | String        | 否* | Base64 编码的图片内容          |
+| url     | String        | 否* | 图片 URL 地址               |
+| format  | String        | 是  | 目标格式：PNG/JPG/WEBP       |
+| width   | Integer       | 否  | 输出宽度（像素）                |
+| height  | Integer       | 否  | 输出高度（像素）                |
+| quality | Integer       | 否  | 压缩质量 1-100，默认 85        |
+| output  | String        | 否  | 输出方式：binary（默认）/ base64 |
 
 *file、base64、url 三选一，至少提供一个
 
@@ -612,7 +661,9 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
   "code": 200,
   "message": "success",
   "status": "SUCCESS",
-  "data": { ... },
+  "data": {
+    ...
+  },
   "traceId": "a1b2c3d4e5f6",
   "timestamp": "2026-03-13T02:00:00Z"
 }
