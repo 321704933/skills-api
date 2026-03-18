@@ -3,6 +3,7 @@ package ai.skills.api.common;
 import ai.skills.api.common.config.*;
 import ai.skills.api.hotsearch.config.SchedulerProperties;
 import ai.skills.api.image.config.ImageConvertProperties;
+import ai.skills.api.stockindex.config.StockIndexProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +24,8 @@ import java.time.Clock;
         IdempotencyProperties.class,
         SchedulerProperties.class,
         ProjectProperties.class,
-        ImageConvertProperties.class
+        ImageConvertProperties.class,
+        StockIndexProperties.class
 })
 @Import({
         RedisStorageConfig.class,
