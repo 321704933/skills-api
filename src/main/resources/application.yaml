@@ -1,8 +1,14 @@
-# 项目基础配置
+# ============================================================================
+# Skills API 配置文件
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# 项目基础信息配置
+# ----------------------------------------------------------------------------
 project:
   name: Skills API
   version: 1.0.0
-  description: 技能 API 服务，提供热搜采集、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历等功能接口。
+  description: 技能 API 服务，提供热搜采集、早报采集、股票指数、天气预报、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历等功能接口。
   contact:
     name: Devil
     email: 321704933@qq.com
@@ -11,87 +17,157 @@ project:
     name: Apache License 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 
+# ----------------------------------------------------------------------------
+# Spring Boot 基础配置
+# ----------------------------------------------------------------------------
 spring:
   application:
     name: skills-api
   config:
+    # 导入本地配置文件（已被 Git 排除，用于覆盖 Redis 密码等敏感信息）
     import: optional:file:./config/application-local.yaml
   jackson:
+    # JSON 序列化时忽略 null 值
     default-property-inclusion: non_null
   data:
     redis:
       host: localhost
       port: 6379
-      password:
-      database: 15
-      timeout: 5s
+      password:                    # Redis 密码，建议在 application-local.yaml 中配置
+      database: 15                 # Redis 数据库编号（0-15）
+      timeout: 5s                  # 连接超时时间
 
+# ----------------------------------------------------------------------------
+# Skills API 自定义配置
+# ----------------------------------------------------------------------------
 skills-api:
+
+  # --------------------------------------------------------------------------
+  # Web 层配置
+  # --------------------------------------------------------------------------
   web:
-    trace-header-name: X-Trace-Id
-    wrap-success-response: true
+    trace-header-name: X-Trace-Id              # 链路追踪 ID 响应头名称
+    wrap-success-response: true                # 是否自动包装成功响应为 ApiResponse<T>
+
+  # --------------------------------------------------------------------------
+  # 幂等控制配置
+  # --------------------------------------------------------------------------
   idempotency:
-    enabled: true
-    header-name: X-Idempotency-Key
-    ttl: PT10M
+    enabled: true                              # 是否启用幂等控制
+    header-name: X-Idempotency-Key             # 幂等键请求头名称
+    ttl: PT10M                                 # 幂等键有效期（10分钟）
+
+  # --------------------------------------------------------------------------
+  # 分布式限流配置
+  # --------------------------------------------------------------------------
   rate-limit:
-    enabled: true
-    client-identifier-header: X-Forwarded-For
-    default-window: PT1M
-    default-permits: 60
+    enabled: true                              # 是否启用限流
+    client-identifier-header: X-Forwarded-For  # 客户端标识请求头（用于识别调用者）
+    default-window: PT1M                       # 默认限流时间窗口（1分钟）
+    default-permits: 60                        # 默认时间窗口内允许的请求数
+
+  # --------------------------------------------------------------------------
+  # 定时调度器配置（热搜采集）
+  # --------------------------------------------------------------------------
   scheduler:
-    enabled: true
-    thread-pool-size: 4
+    enabled: true                              # 是否启用定时调度
+    thread-pool-size: 4                        # 调度线程池大小
     platforms:
-      baidu:
+      baidu:                                   # 百度热搜
+        enabled: true
+        cron: "0 0/30 * * * ?"                 # 每 30 分钟执行一次
+      weibo:                                   # 微博热搜
         enabled: true
         cron: "0 0/30 * * * ?"
-      weibo:
+      douyin:                                  # 抖音热搜
         enabled: true
         cron: "0 0/30 * * * ?"
-      douyin:
+      toutiao:                                 # 今日头条热榜
         enabled: true
         cron: "0 0/30 * * * ?"
-      toutiao:
+      bilibili:                                # B站热门视频
         enabled: true
-        cron: "0 0/30 * * * ?"
-      bilibili:
-        enabled: true
-        cron: "0 */30 * * * ?"
+        cron: "0 */30 * * * ?"                 # 每 30 分钟执行一次
+
+  # --------------------------------------------------------------------------
+  # 图片格式转换配置
+  # --------------------------------------------------------------------------
   image:
-    max-file-size: 10485760
-    max-output-size: 52428800
-    default-quality: 85
+    max-file-size: 10485760                    # 上传文件最大大小（10MB）
+    max-output-size: 52428800                  # 输出文件最大大小（50MB）
+    default-quality: 85                        # 默认压缩质量（1-100）
+
+  # --------------------------------------------------------------------------
+  # 股票指数行情配置
+  # --------------------------------------------------------------------------
+  stock-index:
+    enabled: true                              # 是否启用股票指数模块
+    cache-ttl: PT5M                            # Redis 缓存有效期（5分钟）
+    groups:
+      # A股指数配置
+      a-share:
+        name: A股指数
+        enabled: true
+        codes:
+          - "000001"                           # 上证指数
+          - "399001"                           # 深证成指
+          - "399006"                           # 创业板指
+          - "000300"                           # 沪深300
+          - "000016"                           # 上证50
+          - "000905"                           # 中证500
+          - "000688"                           # 科创50
+      # 港股指数配置
+      hk:
+        name: 港股指数
+        enabled: true
+        codes:
+          - "HSI"                              # 恒生指数
+          - "HSTECH"                           # 恒生科技指数
+      # 美股指数配置
+      us:
+        name: 美股指数
+        enabled: true
+        codes:
+          - "DJI"                              # 道琼斯工业平均指数
+          - "IXIC"                             # 纳斯达克综合指数
+          - "SPX"                              # 标普500指数
+
+  # --------------------------------------------------------------------------
+  # 早报数据采集配置
+  # --------------------------------------------------------------------------
   morning-news:
-    enabled: true
-    thread-pool-size: 2
+    enabled: true                              # 是否启用早报采集
+    thread-pool-size: 2                        # 早报采集线程池大小
     categories:
-      general:
+      general:                                 # 综合早报
+        enabled: true
+        cron: "0 0 7 * * ?"                    # 每天 7:00 执行
+      finance:                                 # 财经早报
         enabled: true
         cron: "0 0 7 * * ?"
-      finance:
+      tech:                                    # 科技早报
         enabled: true
         cron: "0 0 7 * * ?"
-      tech:
+      sports:                                  # 体育早报
         enabled: true
         cron: "0 0 7 * * ?"
-      sports:
+      international:                           # 国际早报
         enabled: true
         cron: "0 0 7 * * ?"
-      international:
+      auto:                                    # 汽车早报
         enabled: true
         cron: "0 0 7 * * ?"
-      auto:
-        enabled: true
-        cron: "0 0 7 * * ?"
-      game:
+      game:                                    # 游戏早报
         enabled: true
         cron: "0 0 7 * * ?"
 
+# ----------------------------------------------------------------------------
+# NextDoc4j API 文档配置
+# ----------------------------------------------------------------------------
 nextdoc4j:
-  enabled: true
+  enabled: true                                # 是否启用 API 文档
   extension:
-    enabled: true
+    enabled: true                              # 是否启用扩展功能
     brand:
       title: "SKILLS API 文档"
       footer-text: "Copyright © 2026 SKILLS API"

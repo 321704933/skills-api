@@ -40,6 +40,14 @@
 - **自动调度** — 基于 Cron 表达式的可配置定时任务，各分类独立调度
 - **Redis 缓存** — 采集数据缓存至 Redis（2 小时 TTL），缓存为空时自动触发即时采集
 
+### 股票指数行情
+
+- **多市场支持** — A股（上证/深证/创业板/沪深300/上证50/中证500/科创50）、港股（恒生/恒生科技）、美股（道琼斯/纳斯达克/标普500）
+- **数据来源** — 养基宝 API（app-api.yangjibao.com），实时行情数据
+- **丰富指标** — 当前价、涨跌额、涨跌幅、成交额、涨跌家数、平盘家数
+- **Redis 缓存** — 数据缓存至 Redis（5 分钟 TTL），平衡实时性与性能
+- **按需筛选** — 从全量数据中按配置的指数代码筛选返回，避免无效数据
+
 ### 天气预报查询
 
 - **全面数据采集** — 从中国天气网采集实时天气、7 天预报、逐小时预报、24 小时观测和生活指数
@@ -107,7 +115,7 @@ src/main/java/ai/skills/api
 │   ├── redis                           #   Redis 工具类（锁、缓存、发布订阅）
 │   └── web                             #   Web 层（链路追踪 Filter）
 ├── hotsearch                           # 热搜采集模块
-│   ├── collector                       #   平台采集器（百度、微博、抖音、头条）
+│   ├── collector                       #   平台采集器（百度、微博、抖音、头条、B站）
 │   ├── config                          #   调度配置
 │   ├── controller                      #   查询接口
 │   └── service                         #   业务逻辑（Redis 缓存 + 查询）
@@ -116,6 +124,12 @@ src/main/java/ai/skills/api
 │   ├── config                          #   调度配置
 │   ├── controller                      #   查询接口
 │   └── service                         #   业务逻辑（Redis 缓存 + 查询）
+├── stockindex                          # 股票指数模块
+│   ├── collector                       #   指数采集器（养基宝 API）
+│   ├── config                          #   配置属性（分组、指数代码）
+│   ├── controller                      #   查询接口
+│   ├── model                           #   响应 Record（IndexQuote、StockIndexResult）
+│   └── service                         #   业务逻辑（Redis 缓存 + 分组筛选）
 ├── weather                             # 天气预报模块
 │   ├── collector                       #   数据采集器（weather.com.cn + d1 接口）
 │   ├── controller                      #   查询接口
@@ -221,6 +235,18 @@ curl http://localhost:8080/api/v1/morning-news/finance/latest
 # 获取科技早报
 curl http://localhost:8080/api/v1/morning-news/tech/latest
 
+# 获取所有股票指数
+curl http://localhost:8080/api/v1/stock-index
+
+# 获取指定分组股票指数（A股）
+curl http://localhost:8080/api/v1/stock-index/a-share
+
+# 获取港股指数
+curl http://localhost:8080/api/v1/stock-index/hk
+
+# 获取美股指数
+curl http://localhost:8080/api/v1/stock-index/us
+
 # 天气预报查询
 curl http://localhost:8080/api/v1/weather/北京
 
@@ -274,6 +300,48 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/v1/weather/{city}` | 根据城市名查询完整天气数据 |
+
+### 股票指数行情
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/stock-index` | 获取所有分组股票指数 |
+| GET | `/api/v1/stock-index/{group}` | 获取指定分组股票指数（a-share/hk/us） |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "success",
+  "status": "SUCCESS",
+  "data": [
+    {
+      "group": "a-share",
+      "groupName": "A股指数",
+      "quotes": [
+        {
+          "code": "000001",
+          "name": "上证指数",
+          "currentPrice": "4038.01",
+          "priceChange": "-11.90",
+          "changePercent": "-0.29",
+          "turnover": "635300591805.9",
+          "upCount": "1090",
+          "downCount": "1206",
+          "flatCount": "66",
+          "date": "2026-03-18",
+          "time": "13:39:47"
+        }
+      ],
+      "collectedAt": "2026-03-18T13:39:50"
+    }
+  ],
+  "traceId": "a1b2c3d4e5f6",
+  "timestamp": "2026-03-18T05:40:00Z"
+}
+```
 
 **响应示例：**
 
@@ -572,6 +640,62 @@ skills-api:
       toutiao:
         enabled: true
         cron: "0 0/30 * * * ?"   # 每 30 分钟
+      bilibili:
+        enabled: true
+        cron: "0 */30 * * * ?"   # 每 30 分钟
+  morning-news:
+    enabled: true
+    thread-pool-size: 2
+    categories:
+      general:
+        enabled: true
+        cron: "0 0 7 * * ?"      # 每天 7:00
+      finance:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      tech:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      sports:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      international:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      auto:
+        enabled: true
+        cron: "0 0 7 * * ?"
+      game:
+        enabled: true
+        cron: "0 0 7 * * ?"
+  stock-index:
+    enabled: true
+    cache-ttl: PT5M
+    groups:
+      a-share:
+        name: A股指数
+        enabled: true
+        codes:
+          - "000001"
+          - "399001"
+          - "399006"
+          - "000300"
+          - "000016"
+          - "000905"
+          - "000688"
+      hk:
+        name: 港股指数
+        enabled: true
+        codes:
+          - "HSI"
+          - "HSTECH"
+      us:
+        name: 美股指数
+        enabled: true
+        codes:
+          - "DJI"
+          - "IXIC"
+          - "SPX"
   image:
     max-file-size: 10485760      # 10MB
     max-output-size: 52428800    # 50MB
