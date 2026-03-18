@@ -157,19 +157,16 @@
                                     <arg value="--main-jar"/>
                                     <arg value="api-${app.version}.jar"/>
                                     <arg value="--main-class"/>
-                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
                                     <arg value="${output.dir}/windows"/>
                                     <arg value="--java-options"/>
-                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
                                     <arg value="--java-options"/>
                                     <arg value="-Dspring.profiles.active=prod"/>
                                     <arg value="--icon"/>
                                     <arg value="${project.basedir}/icons/icon.ico"/>
                                     <arg value="--win-console"/>
-                                    <arg value="--win-dir-chooser"/>
-                                    <arg value="--win-menu"/>
-                                    <arg value="--win-shortcut"/>
                                 </exec>
 
                                 <echo message="========== Windows 打包完成 =========="/>
@@ -186,6 +183,16 @@
                         </goals>
                         <configuration>
                             <target unless="${skip.linux}">
+                                <!-- 检测是否为 Linux 系统 -->
+                                <condition property="is.linux">
+                                    <os family="unix"/>
+                                </condition>
+
+                                <antcall target="do-package-linux"/>
+                            </target>
+
+                            <!-- Linux 打包子任务 -->
+                            <target name="do-package-linux" if="is.linux">
                                 <echo message="========== 开始 Linux 打包 =========="/>
 
                                 <mkdir dir="${project.build.directory}/linux"/>
@@ -214,11 +221,11 @@
                                     <arg value="--main-jar"/>
                                     <arg value="api-${app.version}.jar"/>
                                     <arg value="--main-class"/>
-                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
                                     <arg value="${output.dir}/linux"/>
                                     <arg value="--java-options"/>
-                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
                                     <arg value="--java-options"/>
                                     <arg value="-Dspring.profiles.active=prod"/>
                                     <arg value="--icon"/>
@@ -228,6 +235,11 @@
 
                                 <echo message="========== Linux 打包完成 =========="/>
                                 <echo message="输出目录: ${output.dir}/linux/${app.name}"/>
+                            </target>
+
+                            <!-- 非 Linux 系统跳过提示 -->
+                            <target name="skip-linux" unless="is.linux">
+                                <echo message="========== 跳过 Linux 打包（当前系统不支持）=========="/>
                             </target>
                         </configuration>
                     </execution>
@@ -240,6 +252,16 @@
                         </goals>
                         <configuration>
                             <target unless="${skip.macos}">
+                                <!-- 检测是否为 macOS 系统 -->
+                                <condition property="is.macos">
+                                    <os family="mac"/>
+                                </condition>
+
+                                <antcall target="do-package-macos"/>
+                            </target>
+
+                            <!-- macOS 打包子任务 -->
+                            <target name="do-package-macos" if="is.macos">
                                 <echo message="========== 开始 macOS 打包 =========="/>
 
                                 <mkdir dir="${project.build.directory}/macos"/>
@@ -268,11 +290,11 @@
                                     <arg value="--main-jar"/>
                                     <arg value="api-${app.version}.jar"/>
                                     <arg value="--main-class"/>
-                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
                                     <arg value="${output.dir}/macos"/>
                                     <arg value="--java-options"/>
-                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
                                     <arg value="--java-options"/>
                                     <arg value="-Dspring.profiles.active=prod"/>
                                     <arg value="--icon"/>
@@ -285,6 +307,11 @@
 
                                 <echo message="========== macOS 打包完成 =========="/>
                                 <echo message="输出目录: ${output.dir}/macos/${app.name}.app"/>
+                            </target>
+
+                            <!-- 非 macOS 系统跳过提示 -->
+                            <target name="skip-macos" unless="is.macos">
+                                <echo message="========== 跳过 macOS 打包（当前系统不支持）=========="/>
                             </target>
                         </configuration>
                     </execution>
