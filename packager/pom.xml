@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ai.skills</groupId>
+    <artifactId>skills-api-packager</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Skills API Packager</name>
+    <description>多平台原生打包工具，将 JAR 打包为无需 Java 环境的可执行程序</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- 应用信息 -->
+        <app.name>skills-api</app.name>
+        <app.version>1.0.0</app.version>
+        <app.vendor>Devil</app.vendor>
+        <app.description>Skills API 服务</app.description>
+        <!-- 源 JAR 路径（相对于父目录） -->
+        <source.jar.name>api-${app.version}</source.jar.name>
+        <!-- 输出目录 -->
+        <output.dir>${project.build.directory}/packages</output.dir>
+        <!-- Java 版本 -->
+        <java.version>21</java.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- 复制源 JAR 到构建目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-source-jar</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../target</directory>
+                                    <includes>
+                                        <include>api-*.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-config</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/app/config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../config</directory>
+                                    <includes>
+                                        <include>*.yaml</include>
+                                        <include>*.yml</include>
+                                        <include>*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-data</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/app/data</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../src/main/resources/data</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-ip2region</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/app/ip2region</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../src/main/resources/ip2region</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Windows 打包 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>package-windows</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.windows}">
+                                <echo message="========== 开始 Windows 打包 =========="/>
+
+                                <!-- 创建临时目录 -->
+                                <mkdir dir="${project.build.directory}/windows"/>
+                                <mkdir dir="${output.dir}/windows"/>
+
+                                <!-- 复制 JAR 和资源 -->
+                                <copy todir="${project.build.directory}/windows">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="api-*.jar"/>
+                                    </fileset>
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+
+                                <!-- 执行 jpackage -->
+                                <exec executable="jpackage" dir="${project.build.directory}/windows" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="${app.name}"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="${app.version}"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="${app.vendor}"/>
+                                    <arg value="--description"/>
+                                    <arg value="${app.description}"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-${app.version}.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${output.dir}/windows"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=prod"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.basedir}/icons/icon.ico"/>
+                                    <arg value="--win-console"/>
+                                    <arg value="--win-dir-chooser"/>
+                                    <arg value="--win-menu"/>
+                                    <arg value="--win-shortcut"/>
+                                </exec>
+
+                                <echo message="========== Windows 打包完成 =========="/>
+                                <echo message="输出目录: ${output.dir}/windows/${app.name}"/>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>package-linux</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.linux}">
+                                <echo message="========== 开始 Linux 打包 =========="/>
+
+                                <mkdir dir="${project.build.directory}/linux"/>
+                                <mkdir dir="${output.dir}/linux"/>
+
+                                <copy todir="${project.build.directory}/linux">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="api-*.jar"/>
+                                    </fileset>
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+
+                                <exec executable="jpackage" dir="${project.build.directory}/linux" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="${app.name}"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="${app.version}"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="${app.vendor}"/>
+                                    <arg value="--description"/>
+                                    <arg value="${app.description}"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-${app.version}.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${output.dir}/linux"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=prod"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.basedir}/icons/icon.png"/>
+                                    <arg value="--linux-shortcut"/>
+                                </exec>
+
+                                <echo message="========== Linux 打包完成 =========="/>
+                                <echo message="输出目录: ${output.dir}/linux/${app.name}"/>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>package-macos</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.macos}">
+                                <echo message="========== 开始 macOS 打包 =========="/>
+
+                                <mkdir dir="${project.build.directory}/macos"/>
+                                <mkdir dir="${output.dir}/macos"/>
+
+                                <copy todir="${project.build.directory}/macos">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="api-*.jar"/>
+                                    </fileset>
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+
+                                <exec executable="jpackage" dir="${project.build.directory}/macos" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="${app.name}"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="${app.version}"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="${app.vendor}"/>
+                                    <arg value="--description"/>
+                                    <arg value="${app.description}"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-${app.version}.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="ai.skills.api.SkillsApiApplication"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${output.dir}/macos"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=file:./config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=prod"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.basedir}/icons/icon.icns"/>
+                                    <arg value="--mac-package-identifier"/>
+                                    <arg value="ai.skills.api"/>
+                                    <arg value="--mac-package-name"/>
+                                    <arg value="Skills API"/>
+                                </exec>
+
+                                <echo message="========== macOS 打包完成 =========="/>
+                                <echo message="输出目录: ${output.dir}/macos/${app.name}.app"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- 仅 Windows 打包 -->
+        <profile>
+            <id>windows</id>
+            <properties>
+                <skip.linux>true</skip.linux>
+                <skip.macos>true</skip.macos>
+            </properties>
+        </profile>
+
+        <!-- 仅 Linux 打包 -->
+        <profile>
+            <id>linux</id>
+            <properties>
+                <skip.windows>true</skip.windows>
+                <skip.macos>true</skip.macos>
+            </properties>
+        </profile>
+
+        <!-- 仅 macOS 打包 -->
+        <profile>
+            <id>macos</id>
+            <properties>
+                <skip.windows>true</skip.windows>
+                <skip.linux>true</skip.linux>
+            </properties>
+        </profile>
+    </profiles>
+</project>
