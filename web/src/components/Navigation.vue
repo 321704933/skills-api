@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Zap } from 'lucide-vue-next'
 import ThemeToggle from './ThemeToggle.vue'
+import Logo from '../assets/logo.svg'
 
 const isScrolled = ref(false)
 const isVisible = ref(true)
@@ -37,12 +37,11 @@ onUnmounted(() => {
       <div class="flex items-center justify-between h-16 md:h-20">
         <!-- Logo -->
         <a href="#" class="flex items-center gap-2.5 group">
-          <div
-            class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-            style="background: linear-gradient(135deg, #FF8C42 0%, #F85E00 50%, #FF6B35 100%)"
-          >
-            <Zap class="w-5 h-5 text-white" />
-          </div>
+          <img
+            :src="Logo"
+            alt="Skills API"
+            class="w-9 h-9 rounded-xl transition-transform duration-300 group-hover:scale-110"
+          />
           <span class="font-display font-bold text-lg text-[var(--text-primary)]">
             Skills API
           </span>
