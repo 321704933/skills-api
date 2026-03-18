@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 .m2
 .claude
+web/node_modules
+web/dist
+
 ### STS ###
 .apt_generated
 .classpath
