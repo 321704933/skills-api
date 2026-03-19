@@ -87,7 +87,7 @@ public class ImageConvertService {
 
         // 获取有效质量值
         int effectiveQuality = quality != null ? quality : properties.defaultQuality();
-        effectiveQuality = Math.clamp(effectiveQuality, 1, 100);
+        effectiveQuality = Math.max(1, Math.min(100, effectiveQuality));
 
         // 执行转换
         byte[] outputBytes;
