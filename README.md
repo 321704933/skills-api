@@ -191,7 +191,7 @@ src/main/resources
 
 ### 1. 本地配置
 
-创建 `config/application-local.yaml`（已被 Git 排除）：
+创建 `config/application-local.yaml`（已被 Git 排除），可参考 `config/application-local.yaml.example`：
 
 ```yaml
 spring:
@@ -206,10 +206,43 @@ spring:
 ### 2. 启动
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
-### 3. API 文档
+### 3. 打包部署（可选）
+
+项目支持使用 jpackage 将应用打包为无需安装 JDK 的可执行程序。打包命令会根据操作系统自动选择目标平台：
+
+```bash
+# 自动检测当前操作系统并打包
+mvn package -DskipTests
+
+# 指定平台打包（可选）
+mvn package -DskipTests -Pwindows   # Windows
+mvn package -DskipTests -Plinux      # Linux
+mvn package -DskipTests -Pmacos      # macOS
+```
+
+打包产物位于 `target/packages/` 目录下：
+
+```
+target/packages/
+└── windows/
+    └── skills-api/
+        ├── skills-api.exe          # 可执行程序
+        └── app/
+            ├── config/             # 配置目录（包含示例配置）
+            ├── data/               # 数据文件
+            └── ip2region/          # IP 数据库
+```
+
+**部署步骤：**
+1. 将 `target/packages/windows/skills-api` 目录复制到目标服务器
+2. 在 `app/config` 目录下，将 `application-local.yaml.example` 重命名为 `application-local.yaml`
+3. 根据实际情况修改配置文件中的 Redis 连接等信息
+4. 运行 `skills-api.exe` 启动应用
+
+### 4. API 文档
 
 项目集成了 **NextDoc4j** API 文档框架，启动成功后访问：
 

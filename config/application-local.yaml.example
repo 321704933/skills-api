@@ -1,21 +1,7 @@
 # ============================================================================
-# Skills API 配置文件
+# Skills API 本地开发配置示例
+# 将此文件重命名为 application-local.yaml 并修改配置
 # ============================================================================
-
-# ----------------------------------------------------------------------------
-# 项目基础信息配置
-# ----------------------------------------------------------------------------
-project:
-  name: Skills API
-  version: 1.0.0
-  description: 技能 API 服务，提供热搜采集、早报采集、股票指数、天气预报、散文随机句子、违禁词检测、IP 地理位置查询、今日黄历等功能接口。
-  contact:
-    name: Devil
-    email: 321704933@qq.com
-    url: https://github.com/devil-mao/skills-api
-  license:
-    name: Apache License 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
 
 # ----------------------------------------------------------------------------
 # Spring Boot 基础配置
@@ -23,9 +9,6 @@ project:
 spring:
   application:
     name: skills-api
-  config:
-    # 导入本地配置文件（已被 Git 排除，用于覆盖 Redis 密码等敏感信息）
-    import: optional:file:./config/application-local.yaml
   jackson:
     # JSON 序列化时忽略 null 值
     default-property-inclusion: non_null
@@ -33,9 +16,8 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password:                    # Redis 密码，建议在 application-local.yaml 中配置
-      database: 15                 # Redis 数据库编号（0-15）
-      timeout: 5s                  # 连接超时时间
+      password: your_password
+      database: 15
 
 # ----------------------------------------------------------------------------
 # Skills API 自定义配置
@@ -166,9 +148,3 @@ skills-api:
 # ----------------------------------------------------------------------------
 nextdoc4j:
   enabled: true                                # 是否启用 API 文档
-  extension:
-    enabled: true                              # 是否启用扩展功能
-    brand:
-      title: "SKILLS API 文档"
-      footer-text: "Copyright © 2026 SKILLS API"
-      logo: classpath:icons/icon.png

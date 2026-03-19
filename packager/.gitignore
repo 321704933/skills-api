@@ -1,7 +1,0 @@
-# 打包输出目录
-target/
-
-# IDE 配置
-.idea/
-*.iml
-.vscode/

@@ -9,22 +9,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./mvnw spring-boot:run
 
 # 编译
-./mvnw compile
+mvn compile
 
-# 打包（跳过测试）
-./mvnw package -DskipTests
+# 打包 JAR（跳过测试）
+mvn package -DskipTests
+
+# 打包为可执行程序（使用 jpackage，自动检测操作系统）
+mvn package -DskipTests
+
+# 指定平台打包（可选）
+mvn package -DskipTests -Pwindows   # Windows
+mvn package -DskipTests -Plinux      # Linux
+mvn package -DskipTests -Pmacos      # macOS
 
 # 运行全部测试（需本地 Redis）
-./mvnw test
+mvn test
 
 # 运行单个测试类
-./mvnw test -Dtest=GlobalApiInfrastructureTest
+mvn test -Dtest=GlobalApiInfrastructureTest
 
 # 运行单个测试方法
-./mvnw test -Dtest=GlobalApiInfrastructureTest#shouldWrapSuccessfulResponseAndExposeTraceId
+mvn test -Dtest=GlobalApiInfrastructureTest#shouldWrapSuccessfulResponseAndExposeTraceId
 ```
 
 **前置条件**：本地 Redis（默认 localhost:6379，database 15），可在 `config/application-local.yaml`（Git 已排除）中覆盖配置。
+
+**打包说明**：
+- 打包产物位于 `target/packages/` 目录
+- 打包后的 `app/config` 目录包含配置文件示例（如 `application-local.yaml.example`）
+- 部署时需将示例文件重命名并修改配置
 
 ## 架构概述
 

@@ -175,7 +175,290 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <!-- jpackage 打包插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <!-- 复制数据文件到构建目录 -->
+                    <execution>
+                        <id>copy-config</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/app/config"/>
+                                <mkdir dir="${project.build.directory}/app/data"/>
+                                <mkdir dir="${project.build.directory}/app/ip2region"/>
+                                <copy todir="${project.build.directory}/app/data">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="data/**"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/app/ip2region">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="ip2region/**"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <!-- Windows 打包 -->
+                    <execution>
+                        <id>package-windows</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.windows}">
+                                <echo message="========== 开始 Windows 打包 =========="/>
+                                <!-- 先创建 app 目录并复制配置文件示例 -->
+                                <mkdir dir="${project.build.directory}/app/config"/>
+                                <mkdir dir="${project.build.directory}/app/data"/>
+                                <mkdir dir="${project.build.directory}/app/ip2region"/>
+                                <!-- 复制配置文件示例 -->
+                                <copy todir="${project.build.directory}/app/config" failonerror="false">
+                                    <fileset dir="${project.basedir}/config">
+                                        <include name="*.yaml.example"/>
+                                        <include name="*.yml.example"/>
+                                        <include name="*.properties.example"/>
+                                    </fileset>
+                                </copy>
+                                <!-- 创建打包目录并复制文件 -->
+                                <mkdir dir="${project.build.directory}/windows"/>
+                                <mkdir dir="${project.build.directory}/packages/windows"/>
+                                <copy todir="${project.build.directory}/windows">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/windows">
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+                                <exec executable="jpackage" dir="${project.build.directory}/windows" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="skills-api"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="1.0.0"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="Devil"/>
+                                    <arg value="--description"/>
+                                    <arg value="Skills API 服务"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${project.build.directory}/packages/windows"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=local"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.build.directory}/classes/icons/icon.ico"/>
+                                    <arg value="--win-console"/>
+                                </exec>
+                                <echo message="========== Windows 打包完成 =========="/>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <!-- Linux 打包 -->
+                    <execution>
+                        <id>package-linux</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.linux}">
+                                <echo message="========== 开始 Linux 打包 =========="/>
+                                <!-- 先创建 app 目录并复制配置文件示例 -->
+                                <mkdir dir="${project.build.directory}/app/config"/>
+                                <mkdir dir="${project.build.directory}/app/data"/>
+                                <mkdir dir="${project.build.directory}/app/ip2region"/>
+                                <!-- 复制配置文件示例 -->
+                                <copy todir="${project.build.directory}/app/config" failonerror="false">
+                                    <fileset dir="${project.basedir}/config">
+                                        <include name="*.yaml.example"/>
+                                        <include name="*.yml.example"/>
+                                        <include name="*.properties.example"/>
+                                    </fileset>
+                                </copy>
+                                <!-- 创建打包目录并复制文件 -->
+                                <mkdir dir="${project.build.directory}/linux"/>
+                                <mkdir dir="${project.build.directory}/packages/linux"/>
+                                <copy todir="${project.build.directory}/linux">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/linux">
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+                                <exec executable="jpackage" dir="${project.build.directory}/linux" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="skills-api"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="1.0.0"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="Devil"/>
+                                    <arg value="--description"/>
+                                    <arg value="Skills API 服务"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${project.build.directory}/packages/linux"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=local"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.build.directory}/classes/icons/icon.png"/>
+                                </exec>
+                                <echo message="========== Linux 打包完成 =========="/>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <!-- macOS 打包 -->
+                    <execution>
+                        <id>package-macos</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target unless="${skip.macos}">
+                                <echo message="========== 开始 macOS 打包 =========="/>
+                                <!-- 先创建 app 目录并复制配置文件示例 -->
+                                <mkdir dir="${project.build.directory}/app/config"/>
+                                <mkdir dir="${project.build.directory}/app/data"/>
+                                <mkdir dir="${project.build.directory}/app/ip2region"/>
+                                <!-- 复制配置文件示例 -->
+                                <copy todir="${project.build.directory}/app/config" failonerror="false">
+                                    <fileset dir="${project.basedir}/config">
+                                        <include name="*.yaml.example"/>
+                                        <include name="*.yml.example"/>
+                                        <include name="*.properties.example"/>
+                                    </fileset>
+                                </copy>
+                                <!-- 创建打包目录并复制文件 -->
+                                <mkdir dir="${project.build.directory}/macos"/>
+                                <mkdir dir="${project.build.directory}/packages/macos"/>
+                                <copy todir="${project.build.directory}/macos">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/macos">
+                                    <fileset dir="${project.build.directory}/app"/>
+                                </copy>
+                                <exec executable="jpackage" dir="${project.build.directory}/macos" failonerror="true">
+                                    <arg value="--name"/>
+                                    <arg value="skills-api"/>
+                                    <arg value="--app-version"/>
+                                    <arg value="1.0.0"/>
+                                    <arg value="--vendor"/>
+                                    <arg value="Devil"/>
+                                    <arg value="--description"/>
+                                    <arg value="Skills API 服务"/>
+                                    <arg value="--type"/>
+                                    <arg value="app-image"/>
+                                    <arg value="--input"/>
+                                    <arg value="."/>
+                                    <arg value="--main-jar"/>
+                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="--main-class"/>
+                                    <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
+                                    <arg value="--dest"/>
+                                    <arg value="${project.build.directory}/packages/macos"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.config.additional-location=optional:file:./config/,optional:file:./app/config/"/>
+                                    <arg value="--java-options"/>
+                                    <arg value="-Dspring.profiles.active=local"/>
+                                    <arg value="--icon"/>
+                                    <arg value="${project.build.directory}/classes/icons/icon.icns"/>
+                                    <arg value="--mac-package-identifier"/>
+                                    <arg value="ai.skills.api"/>
+                                    <arg value="--mac-package-name"/>
+                                    <arg value="Skills API"/>
+                                </exec>
+                                <echo message="========== macOS 打包完成 =========="/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- 默认打包：根据操作系统自动选择 -->
+        <profile>
+            <id>auto</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+
+        <!-- 仅 Windows 打包 -->
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <skip.linux>true</skip.linux>
+                <skip.macos>true</skip.macos>
+            </properties>
+        </profile>
+
+        <!-- 仅 Linux 打包 -->
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <skip.windows>true</skip.windows>
+                <skip.macos>true</skip.macos>
+            </properties>
+        </profile>
+
+        <!-- 仅 macOS 打包 -->
+        <profile>
+            <id>macos</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <skip.windows>true</skip.windows>
+                <skip.linux>true</skip.linux>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
