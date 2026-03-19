@@ -14,6 +14,8 @@ import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.CompositeCodec;
 import org.redisson.codec.TypedJsonJacksonCodec;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +33,8 @@ import java.util.TimeZone;
  */
 @Slf4j
 @Configuration
+@ConditionalOnClass(RedissonAutoConfigurationCustomizer.class)
+@ConditionalOnProperty(prefix = "skills-api.cache", name = "type", havingValue = "redis")
 public class RedisConfig {
 
     /**

@@ -20,7 +20,7 @@
 |-------------|--------|-----------------------|
 | Java        | 21     | LTS 版本                |
 | Spring Boot | 3.5.11 | Web 框架                |
-| Redisson    | 3.46.0 | Redis 客户端（分布式锁、限流、缓存） |
+| Redisson    | 3.46.0 | Redis 客户端（可选，分布式锁、限流、缓存） |
 | Hutool      | 5.8.40 | 工具库（HTTP、JSON、DFA 词树） |
 | Jsoup       | 1.18.1 | HTML 解析（天气数据采集）       |
 | ip2region   | 3.3.6  | 离线 IP 地理位置查询          |
@@ -34,8 +34,8 @@
 
 - **统一响应包装** — 所有接口自动包装为 `ApiResponse<T>` 格式，包含状态码、数据、链路追踪 ID 和时间戳
 - **链路追踪** — 自动生成 `traceId` 并通过 `X-Trace-Id` 响应头透传，集成 MDC 用于日志关联
-- **幂等控制** — 基于 `@Idempotent` 注解 + Redis 实现请求去重，防止重复提交
-- **分布式限流** — 基于 `@RateLimited` 注解 + Redis 滑动窗口，支持自定义速率和时间窗口
+- **幂等控制** — 基于 `@Idempotent` 注解实现请求去重，支持 Redis 分布式存储和本地内存存储
+- **分布式限流** — 基于 `@RateLimited` 注解 + 滑动窗口，支持自定义速率和时间窗口，支持 Redis 分布式限流和本地限流
 - **全局异常处理** — 统一捕获业务异常、参数校验异常、系统异常，返回结构化错误响应
 
 ### 热搜数据采集
@@ -43,21 +43,21 @@
 - **多平台支持** — 百度、微博、抖音、今日头条热搜数据定时采集
 - **自动调度** — 基于 Cron 表达式的可配置定时任务，各平台独立调度互不影响
 - **微博免登录** — 自动生成访客 Cookie，无需手动配置登录凭证
-- **Redis 缓存** — 采集数据缓存至 Redis（2 小时 TTL），查询接口直接读取缓存
+- **Redis 缓存** — 采集数据缓存至缓存服务（2 小时 TTL），查询接口直接读取缓存
 
 ### 早报数据采集
 
 - **多分类支持** — 综合、财经、科技、体育、国际、汽车、游戏 7 大分类早报数据采集
 - **数据来源** — 腾讯新闻早报 API，适配新版 JSON 结构（data.tabs[].articleList[]）
 - **自动调度** — 基于 Cron 表达式的可配置定时任务，各分类独立调度
-- **Redis 缓存** — 采集数据缓存至 Redis（2 小时 TTL），缓存为空时自动触发即时采集
+- **缓存服务** — 采集数据缓存至缓存服务（2 小时 TTL），缓存为空时自动触发即时采集
 
 ### 股票指数行情
 
 - **多市场支持** — A股（上证/深证/创业板/沪深300/上证50/中证500/科创50）、港股（恒生/恒生科技）、美股（道琼斯/纳斯达克/标普500）
 - **数据来源** — 养基宝 API（app-api.yangjibao.com），实时行情数据
 - **丰富指标** — 当前价、涨跌额、涨跌幅、成交额、涨跌家数、平盘家数
-- **Redis 缓存** — 数据缓存至 Redis（5 分钟 TTL），平衡实时性与性能
+- **缓存服务** — 数据缓存至缓存服务（5 分钟 TTL），平衡实时性与性能
 - **按需筛选** — 从全量数据中按配置的指数代码筛选返回，避免无效数据
 
 ### 天气预报查询
@@ -68,7 +68,7 @@
 - **逐小时预报** — 每日逐小时温度、天气、风向风力变化趋势
 - **24 小时观测** — 过去 24 小时整点温度、湿度、风力实测数据
 - **生活指数** — 紫外线、穿衣、洗车、运动、过敏、空气污染扩散等
-- **两级缓存** — Redis 缓存（10 分钟 TTL）+ 内存城市编码映射，首次查询后极速响应
+- **两级缓存** — 缓存服务（10 分钟 TTL）+ 内存城市编码映射，首次查询后极速响应
 - **接口限流** — 基于 `@RateLimited` 注解限制天气查询 30 次/分钟
 
 ### 散文随机句子
@@ -101,7 +101,7 @@
 
 - **多种类型** — 支持线干扰、圆圈干扰、扭曲干扰、GIF 动态验证码
 - **可配置参数** — 支持自定义验证码有效期（60-3600秒）、字符数（4-8位）、图片尺寸
-- **Redis 存储** — 验证码存储至 Redis，支持分布式部署
+- **缓存存储** — 验证码存储至缓存服务，支持 Redis 分布式部署和本地内存模式
 - **一次性使用** — 验证码校验后自动删除，防止重复使用
 - **忽略大小写** — 校验时忽略大小写，提升用户体验
 
@@ -120,10 +120,10 @@
 src/main/java/ai/skills/api
 ├── common                              # 公共基础设施
 │   ├── api                             #   统一响应结构（ApiResponse、ResponseCode）
-│   ├── config                          #   配置管理（Redis、WebMvc、属性类）
+│   ├── config                          #   配置管理（缓存、Redis、WebMvc、属性类）
 │   ├── exception                       #   全局异常处理
-│   ├── idempotency                     #   幂等控制（注解 + 拦截器 + Redis 存储）
-│   ├── ratelimit                       #   分布式限流（注解 + 拦截器 + Redis 存储）
+│   ├── idempotency                     #   幂等控制（注解 + 拦截器 + Redis/本地存储）
+│   ├── ratelimit                       #   限流（注解 + 拦截器 + Redis/本地存储）
 │   ├── redis                           #   Redis 工具类（锁、缓存、发布订阅）
 │   └── web                             #   Web 层（链路追踪 Filter）
 ├── hotsearch                           # 热搜采集模块
@@ -187,13 +187,29 @@ src/main/resources
 ### 环境要求
 
 - JDK 21+
-- Redis 6.x+
 
-### 1. 本地配置
+### 缓存模式
 
-创建 `config/application-local.yaml`（已被 Git 排除），可参考 `config/application-local.yaml.example`：
+项目支持两种缓存模式，通过 `skills-api.cache.type` 配置切换：
+
+| 模式 | 说明 | 适用场景 |
+|------|------|---------|
+| `local`（默认） | 本地内存缓存，无需外部依赖 | 开发调试、单机部署 |
+| `redis` | Redis 缓存，支持分布式 | 生产环境、多实例部署 |
+
+默认使用本地内存缓存，**无需安装 Redis 即可直接启动**。如需使用 Redis，配置 `skills-api.cache.type=redis` 并确保 Redis 服务可用。
+
+### 1. 本地配置（可选）
+
+创建 `config/application-local.yaml`（已被 Git 排除），可参考 `config/application-local.yaml.example`。
+
+**使用 Redis 缓存时**，需要配置 Redis 连接信息：
 
 ```yaml
+skills-api:
+  cache:
+    type: redis              # 切换为 Redis 缓存模式
+
 spring:
   data:
     redis:
@@ -201,6 +217,17 @@ spring:
       port: 6379
       password: your_password
       database: 15
+```
+
+**使用本地缓存时**（默认），无需额外配置。如需调整本地缓存参数：
+
+```yaml
+skills-api:
+  cache:
+    type: local              # 本地内存缓存（默认值，可省略）
+    local:
+      max-size: 10000        # 最大缓存条目数
+      cleanup-interval: 1m   # 过期清理间隔
 ```
 
 ### 2. 启动
@@ -239,7 +266,7 @@ target/packages/
 **部署步骤：**
 1. 将 `target/packages/windows/skills-api` 目录复制到目标服务器
 2. 在 `app/config` 目录下，将 `application-local.yaml.example` 重命名为 `application-local.yaml`
-3. 根据实际情况修改配置文件中的 Redis 连接等信息
+3. 根据需要修改配置文件（默认使用本地缓存，无需 Redis；如需 Redis 则配置 `skills-api.cache.type=redis`）
 4. 运行 `skills-api.exe` 启动应用
 
 ### 4. API 文档
@@ -708,6 +735,11 @@ curl -X POST -d "url=https://example.com/image.png" -d "format=JPG" -d "width=80
 
 ```yaml
 skills-api:
+  cache:
+    type: local                # 缓存模式：local（默认）或 redis
+    local:
+      max-size: 10000          # 本地缓存最大条目数（仅 local 模式）
+      cleanup-interval: 1m     # 本地缓存过期清理间隔（仅 local 模式）
   scheduler:
     enabled: true
     thread-pool-size: 4

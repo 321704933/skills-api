@@ -1,6 +1,6 @@
 package ai.skills.api.weather.collector;
 
-import ai.skills.api.common.redis.RedisUtils;
+import ai.skills.api.common.cache.CacheService;
 import ai.skills.api.weather.model.WeatherResult;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
@@ -61,12 +61,12 @@ public class WeatherCollector {
     private static final int TIMEOUT_MS = 10000;
 
     /**
-     * 天气数据缓存键前缀
+     * 缓存键前缀
      */
     private static final String CACHE_KEY_PREFIX = "weather:data:";
 
     /**
-     * 天气数据缓存时长（10分钟）
+     * 缓存时长（10分钟）
      */
     private static final Duration CACHE_TTL = Duration.ofMinutes(10);
 
@@ -75,10 +75,14 @@ public class WeatherCollector {
      */
     private final Map<String, String> cityCodeMap = new ConcurrentHashMap<>();
 
+    /** 缓存服务 */
+    private final CacheService cacheService;
+
     /**
      * 构造函数，加载城市编码数据
      */
-    public WeatherCollector() {
+    public WeatherCollector(CacheService cacheService) {
+        this.cacheService = cacheService;
         loadCityCodes();
     }
 
@@ -119,12 +123,12 @@ public class WeatherCollector {
 
     /**
      * 根据城市编码采集天气数据
-     * 优先从 Redis 缓存读取，缓存未命中时采集并写入缓存
+     * 优先从缓存读取，缓存未命中时采集并写入缓存
      */
     public WeatherResult collectByCode(String cityName, String cityCode) {
         // 1. 尝试从缓存获取
         String cacheKey = CACHE_KEY_PREFIX + cityCode;
-        WeatherResult cached = RedisUtils.getCacheObject(cacheKey);
+        WeatherResult cached = cacheService.get(cacheKey);
         if (cached != null) {
             log.debug("命中天气缓存: {} ({})", cityName, cityCode);
             return cached;
@@ -142,7 +146,7 @@ public class WeatherCollector {
 
             // 3. 写入缓存
             if (result != null) {
-                RedisUtils.setCacheObject(cacheKey, result, CACHE_TTL);
+                cacheService.set(cacheKey, result, CACHE_TTL);
                 log.debug("天气数据已缓存: {} ({})，TTL={}", cityName, cityCode, CACHE_TTL);
             }
 

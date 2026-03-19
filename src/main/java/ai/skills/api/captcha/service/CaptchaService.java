@@ -4,9 +4,10 @@ import ai.skills.api.captcha.model.CaptchaConfig;
 import ai.skills.api.captcha.model.CaptchaResult;
 import ai.skills.api.captcha.model.CaptchaType;
 import ai.skills.api.captcha.model.CaptchaVerifyResult;
-import ai.skills.api.common.redis.RedisUtils;
+import ai.skills.api.common.cache.CacheService;
 import cn.hutool.captcha.*;
 import cn.hutool.core.codec.Base64;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 /**
  * 验证码服务
  * <p>
- * 使用 Hutool 生成图形验证码，通过 Redis 存储验证码进行校验
+ * 使用 Hutool 生成图形验证码，通过缓存存储验证码进行校验
  * 支持多种验证码类型：线干扰、圆圈干扰、扭曲干扰、GIF 动态验证码
  *
  * @author devil_
@@ -25,12 +26,16 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CaptchaService {
 
     /**
-     * Redis 键前缀
+     * 缓存键前缀
      */
-    private static final String REDIS_KEY_PREFIX = "captcha:";
+    private static final String CACHE_KEY_PREFIX = "captcha:";
+
+    /** 缓存服务 */
+    private final CacheService cacheService;
 
     /**
      * 干扰元素数量
@@ -74,9 +79,9 @@ public class CaptchaService {
         // 生成唯一标识
         String captchaId = UUID.randomUUID().toString();
 
-        // 将验证码存入 Redis
-        String redisKey = REDIS_KEY_PREFIX + captchaId;
-        RedisUtils.setCacheObject(redisKey, code, Duration.ofSeconds(ttlSeconds));
+        // 将验证码存入缓存
+        String cacheKey = CACHE_KEY_PREFIX + captchaId;
+        cacheService.set(cacheKey, code, Duration.ofSeconds(ttlSeconds));
 
         // 获取图片 Base64 编码
         String mimeType = type == CaptchaType.GIF ? "image/gif" : "image/png";
@@ -125,10 +130,10 @@ public class CaptchaService {
      * @return 校验结果
      */
     public CaptchaVerifyResult verify(String captchaId, String inputCode) {
-        String redisKey = REDIS_KEY_PREFIX + captchaId;
+        String cacheKey = CACHE_KEY_PREFIX + captchaId;
 
-        // 从 Redis 获取存储的验证码
-        String storedCode = RedisUtils.getCacheObject(redisKey);
+        // 从缓存获取存储的验证码
+        String storedCode = cacheService.get(cacheKey);
 
         // 验证码不存在或已过期
         if (storedCode == null) {
@@ -140,7 +145,7 @@ public class CaptchaService {
         boolean valid = storedCode.equalsIgnoreCase(inputCode);
 
         // 无论校验成功与否，都删除验证码（一次性使用）
-        RedisUtils.deleteObject(redisKey);
+        cacheService.delete(cacheKey);
 
         if (valid) {
             log.debug("验证码校验通过，captchaId: {}", captchaId);

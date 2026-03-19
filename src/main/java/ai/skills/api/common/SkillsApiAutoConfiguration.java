@@ -25,10 +25,10 @@ import java.time.Clock;
         SchedulerProperties.class,
         ProjectProperties.class,
         ImageConvertProperties.class,
-        StockIndexProperties.class
+        StockIndexProperties.class,
+        CacheProperties.class
 })
 @Import({
-        RedisStorageConfig.class,
         WebMvcConfig.class,
         SpringDocAutoConfig.class
 })

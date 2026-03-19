@@ -1,9 +1,10 @@
 package ai.skills.api.morningnews.service;
 
-import ai.skills.api.common.redis.RedisUtils;
+import ai.skills.api.common.cache.CacheService;
 import ai.skills.api.morningnews.MorningNewsCollector;
 import ai.skills.api.morningnews.MorningNewsResult;
 import ai.skills.api.morningnews.NewsCategory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,20 +18,18 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MorningNewsService {
 
-    private static final String REDIS_KEY_PREFIX = "morningnews:";
-    private static final String REDIS_KEY_SUFFIX = ":latest";
+    private static final String CACHE_KEY_PREFIX = "morningnews:";
+    private static final String CACHE_KEY_SUFFIX = ":latest";
     private static final Duration CACHE_TTL = Duration.ofHours(2);
 
     private final Map<String, MorningNewsCollector> collectors;
-
-    public MorningNewsService(Map<String, MorningNewsCollector> collectors) {
-        this.collectors = collectors;
-    }
+    private final CacheService cacheService;
 
     /**
-     * 功能：将采集结果缓存到 Redis。
+     * 功能：将采集结果缓存。
      *
      * @param result 采集结果
      */
@@ -40,9 +39,9 @@ public class MorningNewsService {
             return;
         }
 
-        String redisKey = REDIS_KEY_PREFIX + result.category() + REDIS_KEY_SUFFIX;
-        RedisUtils.setCacheObject(redisKey, result, CACHE_TTL);
-        log.info("分类 [{}] 早报数据已缓存至 Redis，共 {} 条，TTL {} 小时",
+        String cacheKey = CACHE_KEY_PREFIX + result.category() + CACHE_KEY_SUFFIX;
+        cacheService.set(cacheKey, result, CACHE_TTL);
+        log.info("分类 [{}] 早报数据已缓存，共 {} 条，TTL {} 小时",
                 result.category(), result.items().size(), CACHE_TTL.toHours());
     }
 
@@ -55,9 +54,9 @@ public class MorningNewsService {
      * @return 早报结果（无数据返回 null）
      */
     public MorningNewsResult getLatest(NewsCategory category) {
-        String redisKey = REDIS_KEY_PREFIX + category.getCode() + REDIS_KEY_SUFFIX;
+        String cacheKey = CACHE_KEY_PREFIX + category.getCode() + CACHE_KEY_SUFFIX;
         try {
-            MorningNewsResult result = RedisUtils.getCacheObject(redisKey);
+            MorningNewsResult result = cacheService.get(cacheKey);
             if (result != null) {
                 return result;
             }
@@ -65,8 +64,8 @@ public class MorningNewsService {
             log.info("分类 [{}] 缓存为空，触发即时采集", category.getCode());
             return collectAndCache(category);
         } catch (Exception e) {
-            log.warn("Redis 缓存反序列化失败，清理旧缓存，键名：{}", redisKey);
-            RedisUtils.deleteObject(redisKey);
+            log.warn("缓存反序列化失败，清理旧缓存，键名：{}", cacheKey);
+            cacheService.delete(cacheKey);
             return collectAndCache(category);
         }
     }

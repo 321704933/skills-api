@@ -25,7 +25,7 @@ const techs = ref<Tech[]>([
     name: 'Redis',
     icon: '⚡',
     color: '#DC382D',
-    description: 'Caching'
+    description: 'Optional'
   },
   {
     name: 'Maven',
@@ -109,12 +109,12 @@ onMounted(() => {
           <div class="text-center">
             <div class="font-display font-bold text-4xl gradient-text mb-2">Zero</div>
             <div class="text-[var(--text-secondary)]">数据库依赖</div>
-            <p class="text-sm text-[var(--text-muted)] mt-2">纯内存 + Redis 缓存架构</p>
+            <p class="text-sm text-[var(--text-muted)] mt-2">本地缓存 + Redis 可选架构</p>
           </div>
           <div class="text-center">
             <div class="font-display font-bold text-4xl gradient-text mb-2">High</div>
             <div class="text-[var(--text-secondary)]">性能优化</div>
-            <p class="text-sm text-[var(--text-muted)] mt-2">分布式限流 + 幂等控制</p>
+            <p class="text-sm text-[var(--text-muted)] mt-2">智能限流 + 幂等控制</p>
           </div>
           <div class="text-center">
             <div class="font-display font-bold text-4xl gradient-text mb-2">Full</div>

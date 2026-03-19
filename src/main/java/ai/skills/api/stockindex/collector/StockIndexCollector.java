@@ -1,6 +1,6 @@
 package ai.skills.api.stockindex.collector;
 
-import ai.skills.api.common.redis.RedisUtils;
+import ai.skills.api.common.cache.CacheService;
 import ai.skills.api.stockindex.config.StockIndexProperties;
 import ai.skills.api.stockindex.model.IndexQuote;
 import ai.skills.api.stockindex.model.StockIndexResult;
@@ -25,7 +25,7 @@ import java.util.List;
  * <ol>
  *     <li>调用养基宝指数接口，一次请求获取全部指数数据</li>
  *     <li>解析 JSON 响应，提取关键字段</li>
- *     <li>写入 Redis 缓存，默认 TTL 5 分钟</li>
+ *     <li>写入缓存，默认 TTL 5 分钟</li>
  * </ol>
  * 作者：Devil
  */
@@ -51,11 +51,12 @@ public class StockIndexCollector {
             + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
     /**
-     * Redis 缓存键
+     * 缓存键
      */
     private static final String CACHE_KEY = "stockindex:all";
 
     private final StockIndexProperties properties;
+    private final CacheService cacheService;
 
     /**
      * 功能：采集指定分组代码的指数行情数据。
@@ -88,21 +89,21 @@ public class StockIndexCollector {
     public List<IndexQuote> collectAll() {
         // 1. 尝试从缓存获取
         try {
-            List<IndexQuote> cached = RedisUtils.getCacheObject(CACHE_KEY);
+            List<IndexQuote> cached = cacheService.get(CACHE_KEY);
             if (cached != null) {
                 log.debug("命中股票指数缓存");
                 return cached;
             }
         } catch (Exception e) {
-            log.warn("Redis 缓存反序列化失败，清理旧缓存");
-            RedisUtils.deleteObject(CACHE_KEY);
+            log.warn("缓存反序列化失败，清理旧缓存");
+            cacheService.delete(CACHE_KEY);
         }
 
         // 2. 缓存未命中，执行采集
         try {
             List<IndexQuote> quotes = fetchQuotes();
             if (!quotes.isEmpty()) {
-                RedisUtils.setCacheObject(CACHE_KEY, quotes, properties.getCacheTtl());
+                cacheService.set(CACHE_KEY, quotes, properties.getCacheTtl());
                 log.debug("股票指数数据已缓存，共 {} 条，TTL={}", quotes.size(), properties.getCacheTtl());
             }
             return quotes;

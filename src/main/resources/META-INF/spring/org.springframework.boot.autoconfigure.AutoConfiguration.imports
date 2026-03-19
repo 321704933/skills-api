@@ -1,1 +1,3 @@
 ai.skills.api.common.SkillsApiAutoConfiguration
+ai.skills.api.common.config.CacheAutoConfiguration
+ai.skills.api.common.config.RedisStorageConfig
