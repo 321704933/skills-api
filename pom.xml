@@ -12,7 +12,7 @@
 
     <groupId>ai.skills</groupId>
     <artifactId>api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>skills-api</name>
     <description>基于 Spring Boot 3 的轻量级 API 脚手架，内置请求追踪、幂等控制、分布式限流等基础设施，并提供多平台热搜数据采集能力。</description>
     <url>https://github.com/Devil-Starter/skills-api</url>
@@ -245,7 +245,7 @@
                                     <arg value="--name"/>
                                     <arg value="skills-api"/>
                                     <arg value="--app-version"/>
-                                    <arg value="1.0.0"/>
+                                    <arg value="1.0.1"/>
                                     <arg value="--vendor"/>
                                     <arg value="Devil"/>
                                     <arg value="--description"/>
@@ -255,7 +255,7 @@
                                     <arg value="--input"/>
                                     <arg value="."/>
                                     <arg value="--main-jar"/>
-                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="api-1.0.1.jar"/>
                                     <arg value="--main-class"/>
                                     <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
@@ -310,7 +310,7 @@
                                     <arg value="--name"/>
                                     <arg value="skills-api"/>
                                     <arg value="--app-version"/>
-                                    <arg value="1.0.0"/>
+                                    <arg value="1.0.1"/>
                                     <arg value="--vendor"/>
                                     <arg value="Devil"/>
                                     <arg value="--description"/>
@@ -320,7 +320,7 @@
                                     <arg value="--input"/>
                                     <arg value="."/>
                                     <arg value="--main-jar"/>
-                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="api-1.0.1.jar"/>
                                     <arg value="--main-class"/>
                                     <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
@@ -374,7 +374,7 @@
                                     <arg value="--name"/>
                                     <arg value="skills-api"/>
                                     <arg value="--app-version"/>
-                                    <arg value="1.0.0"/>
+                                    <arg value="1.0.1"/>
                                     <arg value="--vendor"/>
                                     <arg value="Devil"/>
                                     <arg value="--description"/>
@@ -384,7 +384,7 @@
                                     <arg value="--input"/>
                                     <arg value="."/>
                                     <arg value="--main-jar"/>
-                                    <arg value="api-1.0.0.jar"/>
+                                    <arg value="api-1.0.1.jar"/>
                                     <arg value="--main-class"/>
                                     <arg value="org.springframework.boot.loader.launch.JarLauncher"/>
                                     <arg value="--dest"/>
